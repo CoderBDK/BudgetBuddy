@@ -6,4 +6,16 @@ import kotlinx.serialization.Serializable
 object Home
 
 @Serializable
-object Transaction
+object AddTransaction
+
+@Serializable
+object Budgets
+
+@Serializable
+object Analytics
+
+@Serializable
+object Settings
+
+@Serializable
+object Transactions

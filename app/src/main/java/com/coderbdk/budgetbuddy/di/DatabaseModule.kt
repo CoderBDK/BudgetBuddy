@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.coderbdk.budgetbuddy.data.db.BudgetBuddyDatabase
 import com.coderbdk.budgetbuddy.data.db.dao.BudgetDao
+import com.coderbdk.budgetbuddy.data.db.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,5 +28,9 @@ object DatabaseModule {
     @Provides
     fun provideBudgetDao(database: BudgetBuddyDatabase): BudgetDao {
         return database.budgetDao()
+    }
+    @Provides
+    fun provideTransactionDao(database: BudgetBuddyDatabase): TransactionDao {
+        return database.transactionDao()
     }
 }

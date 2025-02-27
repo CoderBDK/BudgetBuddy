@@ -45,6 +45,9 @@ android {
 
 dependencies {
 
+    // paging
+    implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.paging.compose)
     // chart
     implementation(libs.mpandroidchart)
     // settings
