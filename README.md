@@ -14,13 +14,14 @@
 - **Filter**: Filter transactions by date range, category, or transaction type (income/expense).
 
 ## 📸 Preview
-![image](https://github.com/user-attachments/assets/7df3684b-5d28-464d-b125-9a49a6b3197b)
-![image](https://github.com/user-attachments/assets/071ea11f-25d4-4dc8-9233-cb2b6498595f)
-![image](https://github.com/user-attachments/assets/fe5f2d9c-ccc7-4c5c-a018-da1c4bee3327)
 
-![image](https://github.com/user-attachments/assets/896d5e61-ae46-429e-bf82-3cfbfbe43c7f)
-![image](https://github.com/user-attachments/assets/b489ee37-c5a9-4b6f-a1c9-bb186030edbb)
-
+<div align="center">
+ <img src="https://github.com/user-attachments/assets/7df3684b-5d28-464d-b125-9a49a6b3197b" alt="Screenshot 1" width="300" />
+  <img src="https://github.com/user-attachments/assets/071ea11f-25d4-4dc8-9233-cb2b6498595f" alt="Screenshot 1" width="300" />
+  <img src="https://github.com/user-attachments/assets/896d5e61-ae46-429e-bf82-3cfbfbe43c7f" alt="Screenshot 3" width="300" />
+    <img src="https://github.com/user-attachments/assets/fe5f2d9c-ccc7-4c5c-a018-da1c4bee3327" alt="Screenshot 2" width="300" />
+  <img src="https://github.com/user-attachments/assets/b489ee37-c5a9-4b6f-a1c9-bb186030edbb" alt="Screenshot 3" width="300" />
+</div>
 ## Requirements
 
 - **Android Studio** with **Kotlin** support
