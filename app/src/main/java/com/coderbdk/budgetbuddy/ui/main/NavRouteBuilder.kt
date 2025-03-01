@@ -27,4 +27,7 @@ fun NavGraphBuilder.navRouteBuilder(
     composable<Transactions> {
         TransactionsScreen()
     }
+    composable<TransactionDetails> {
+        TransactionsScreen()
+    }
 }
