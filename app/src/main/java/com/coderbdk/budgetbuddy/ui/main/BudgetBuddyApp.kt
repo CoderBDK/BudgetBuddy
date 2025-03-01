@@ -99,7 +99,7 @@ fun BudgetBuddyApp() {
                     navigationIcon = {
                         if (currentDestination?.hasRoute(Home::class) != true) {
                             IconButton(
-                                onClick = { navController.popBackStack() },
+                                onClick = { navController.navigateUp() },
                                 modifier = Modifier.rotate(rotation)
                             ) {
                                 Icon(
