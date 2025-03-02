@@ -36,7 +36,7 @@ import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
-import com.coderbdk.budgetbuddy.ui.main.Budgets
+import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.ui.transaction.dialog.AlertDialogBudgetCreate
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
@@ -52,7 +52,7 @@ fun AddTransactionScreen(
         AlertDialogBudgetCreate(
             onDismissRequest = viewModel::hideBudgetCreation
         ) {
-            navController.navigate(Budgets)
+            navController.navigate(Screen.Budgets)
         }
     }
     AddTransactionScreen(

@@ -26,11 +26,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 
 @Composable
 fun TransactionsScreen(
+    navController: NavController,
     viewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val transactions = viewModel.transactions.collectAsLazyPagingItems()
@@ -43,7 +46,9 @@ fun TransactionsScreen(
             items(transactions.itemCount) {
                 val item = transactions[it]
                 if (item != null) {
-                    TransactionItem(item)
+                    TransactionItem(item) {
+                        navController.navigate(Screen.TransactionDetails("${item}"))
+                    }
                 }
             }
         }

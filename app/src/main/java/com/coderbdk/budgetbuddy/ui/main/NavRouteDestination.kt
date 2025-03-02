@@ -1,25 +1,75 @@
 package com.coderbdk.budgetbuddy.ui.main
 
-import com.coderbdk.budgetbuddy.data.db.entity.Transaction
+import androidx.navigation.NavDestination
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 
 @Serializable
-object Home
+sealed class Screen(
+    @SerialName("title")
+    val title: String
+) {
+    @Serializable
+    data object Home : Screen("Home")
 
-@Serializable
-object AddTransaction
+    @Serializable
+    data object AddTransaction : Screen("Add Transaction")
 
-@Serializable
-object Budgets
+    @Serializable
+    data object Budgets : Screen("Budgets")
 
-@Serializable
-object Analytics
+    @Serializable
+    data object Analytics : Screen("Analytics")
 
-@Serializable
-object Settings
+    @Serializable
+    data object Settings : Screen("Settings")
 
-@Serializable
-object Transactions
+    @Serializable
+    data object Transactions : Screen("Transactions")
 
-@Serializable
-data class TransactionDetails(val transaction: Transaction)
+    @Serializable
+    data class TransactionDetails(val transactionData: String) : Screen("Transaction Details")
+
+}
+
+private val titleMap by lazy {
+    Screen::class.sealedSubclasses.associate {
+        val title = getTitle(it)
+        it.qualifiedName to title
+    }
+}
+
+private fun getTitle(it: KClass<out Screen>): String? {
+    return when {
+        it.primaryConstructor != null -> {
+            val constructor = it.primaryConstructor
+            val parameters = constructor?.parameters ?: emptyList()
+            if (parameters.isNotEmpty()) {
+                val argumentMap = parameters.associateWith { param ->
+                    when (param.type.classifier) {
+                        String::class -> ""
+                        Int::class -> 0
+                        Boolean::class -> false
+                        else -> null
+                    }
+                }
+                constructor?.callBy(argumentMap)?.title
+            } else {
+                it.objectInstance?.title
+            }
+        }
+
+        else -> {
+            it.objectInstance?.title
+        }
+    }
+}
+
+fun NavDestination.getNavDestinationTitle(defaultTitle: String): String {
+    val routeKey = route?.substringBefore("/") ?: ""
+    return titleMap[routeKey] ?: defaultTitle
+}
+
+

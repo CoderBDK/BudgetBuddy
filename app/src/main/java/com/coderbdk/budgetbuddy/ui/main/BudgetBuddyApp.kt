@@ -59,16 +59,17 @@ fun BudgetBuddyApp() {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val currentDestination = navBackStackEntry?.destination
 
+
     val bottomNavItems = remember {
         listOf(
-            BottomNavItem(Home, "Home", Icons.Default.Home),
-            BottomNavItem(Budgets, "Budgets", Icons.Default.BusinessCenter),
-            BottomNavItem(Analytics, "Analytics", Icons.Default.Analytics),
-            BottomNavItem(Settings, "Settings", Icons.Default.Settings),
+            BottomNavItem(Screen.Home, "Home", Icons.Default.Home),
+            BottomNavItem(Screen.Budgets, "Budgets", Icons.Default.BusinessCenter),
+            BottomNavItem(Screen.Analytics, "Analytics", Icons.Default.Analytics),
+            BottomNavItem(Screen.Settings, "Settings", Icons.Default.Settings),
         )
     }
     val rotation by animateFloatAsState(
-        if (currentDestination?.hasRoute(Home::class) != true) 0f else 90f
+        if (currentDestination?.hasRoute(Screen.Home::class) != true) 0f else 90f
     )
 
     val mainViewModel = hiltViewModel<MainViewModel>()
@@ -82,6 +83,9 @@ fun BudgetBuddyApp() {
             }
         }
     }
+
+    val title = currentDestination?.getNavDestinationTitle("Null")
+
     BudgetBuddyTheme {
         Scaffold(
             modifier = Modifier
@@ -92,12 +96,12 @@ fun BudgetBuddyApp() {
                 TopAppBar(
                     title = {
                         Text(
-                            "Budget Buddy",
+                            text = if (currentDestination?.hasRoute(Screen.Home::class) == true) "Budget Buddy" else "$title",
                             fontWeight = FontWeight.Bold
                         )
                     },
                     navigationIcon = {
-                        if (currentDestination?.hasRoute(Home::class) != true) {
+                        if (currentDestination?.hasRoute(Screen.Home::class) != true) {
                             IconButton(
                                 onClick = { navController.navigateUp() },
                                 modifier = Modifier.rotate(rotation)
@@ -146,7 +150,7 @@ fun BudgetBuddyApp() {
             }) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = Home,
+                startDestination = Screen.Home,
                 modifier = Modifier.padding(innerPadding),
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
@@ -165,9 +169,9 @@ fun FloatingActionButtonContent(
     mainViewModel: MainViewModel
 ) {
     when (baseRoute) {
-        Home::class.qualifiedName -> {
+        Screen.Home::class.qualifiedName -> {
             FloatingActionButton(onClick = {
-                navController.navigate(AddTransaction)
+                navController.navigate(Screen.AddTransaction)
             }) {
 
                 Icon(
@@ -177,7 +181,7 @@ fun FloatingActionButtonContent(
             }
         }
 
-        Budgets::class.qualifiedName -> {
+        Screen.Budgets::class.qualifiedName -> {
             FloatingActionButton(onClick = {
                 mainViewModel.performFabAction(FabAction.AddBudget)
             }) {

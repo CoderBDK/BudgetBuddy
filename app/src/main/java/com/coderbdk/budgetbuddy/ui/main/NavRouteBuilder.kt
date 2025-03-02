@@ -6,28 +6,30 @@ import androidx.navigation.compose.composable
 import com.coderbdk.budgetbuddy.ui.budget.BudgetScreen
 import com.coderbdk.budgetbuddy.ui.home.HomeScreen
 import com.coderbdk.budgetbuddy.ui.transaction.AddTransactionScreen
+import com.coderbdk.budgetbuddy.ui.transaction.TransactionDetailsScreen
 import com.coderbdk.budgetbuddy.ui.transaction.TransactionsScreen
 
 fun NavGraphBuilder.navRouteBuilder(
     navController: NavHostController,
     mainViewModel: MainViewModel
 ) {
-    composable<Home> {
+    composable<Screen.Home> {
         HomeScreen(navController)
     }
-    composable<Budgets> {
+    composable<Screen.Budgets> {
         BudgetScreen(mainViewModel = mainViewModel)
     }
-    composable<AddTransaction> {
+    composable<Screen.AddTransaction> {
         AddTransactionScreen(navController)
     }
-    composable<Analytics> { }
-    composable<Settings> { }
-
-    composable<Transactions> {
-        TransactionsScreen()
+    composable<Screen.Analytics> { }
+    composable<Screen.Settings> {
     }
-    composable<TransactionDetails> {
-        TransactionsScreen()
+
+    composable<Screen.Transactions> {
+        TransactionsScreen(navController)
+    }
+    composable<Screen.TransactionDetails> {
+        TransactionDetailsScreen(navController)
     }
 }

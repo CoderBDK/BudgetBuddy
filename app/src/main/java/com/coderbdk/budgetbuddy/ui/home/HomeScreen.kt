@@ -40,7 +40,7 @@ import androidx.navigation.NavController
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionType
-import com.coderbdk.budgetbuddy.ui.main.Transactions
+import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 import com.coderbdk.budgetbuddy.utils.CategoryColorUtils
 import com.github.mikephil.charting.charts.PieChart
@@ -87,7 +87,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
         recentTransactionsSection(recentTransactions, gotoTransactionDetails = {
-            navController.navigate(Transactions)
+            navController.navigate(Screen.Transactions)
         })
     }
 }
@@ -264,6 +264,6 @@ private fun LazyListScope.recentTransactionsSection(
 
     }
     items(transactions.take(3)) { transaction ->
-        TransactionItem(transaction)
+        TransactionItem(transaction){}
     }
 }

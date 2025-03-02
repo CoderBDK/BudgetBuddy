@@ -34,8 +34,9 @@ import java.util.Date
 
 
 @Composable
-fun TransactionItem(transaction: Transaction) {
+fun TransactionItem(transaction: Transaction, gotoDetails: () -> Unit) {
     ElevatedCard(
+        onClick = gotoDetails,
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         modifier = Modifier
@@ -87,7 +88,7 @@ fun TransactionItem(transaction: Transaction) {
 @Composable
 fun TransactionItemPreview() {
     BudgetBuddyTheme {
-        Column (Modifier.padding(8.dp)) {
+        Column(Modifier.padding(8.dp)) {
             TransactionItem(
                 Transaction(
                     id = 0,
@@ -96,7 +97,8 @@ fun TransactionItemPreview() {
                     category = BudgetCategory.FOOD,
                     period = BudgetPeriod.DAILY,
                     date = System.currentTimeMillis()
-                )
+                ),
+                gotoDetails = {}
             )
             TransactionItem(
                 Transaction(
@@ -106,7 +108,8 @@ fun TransactionItemPreview() {
                     category = BudgetCategory.FOOD,
                     period = BudgetPeriod.DAILY,
                     date = System.currentTimeMillis()
-                )
+                ),
+                gotoDetails = {}
             )
         }
     }
