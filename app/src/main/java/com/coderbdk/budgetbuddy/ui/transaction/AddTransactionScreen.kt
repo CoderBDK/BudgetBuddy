@@ -107,7 +107,6 @@ fun AddTransactionScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(text = "Add Transaction", fontWeight = FontWeight.Bold, fontSize = 24.sp)
         Spacer(Modifier.padding(8.dp))
         OutlinedTextField(
             value = uiState.amount.toString(),

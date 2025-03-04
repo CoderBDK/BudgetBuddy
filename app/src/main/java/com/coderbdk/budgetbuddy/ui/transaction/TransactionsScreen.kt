@@ -30,6 +30,8 @@ import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Composable
 fun TransactionsScreen(
@@ -47,7 +49,7 @@ fun TransactionsScreen(
                 val item = transactions[it]
                 if (item != null) {
                     TransactionItem(item) {
-                        navController.navigate(Screen.TransactionDetails("${item}"))
+                        navController.navigate(Screen.TransactionDetails("${Json.encodeToString(item)}"))
                     }
                 }
             }
