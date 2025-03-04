@@ -8,7 +8,10 @@ import androidx.room.PrimaryKey
 import com.coderbdk.budgetbuddy.data.model.BudgetCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionType
+import kotlinx.serialization.Serializable
 
+
+@Serializable
 @Entity(
     tableName = "transactions",
     foreignKeys = [
