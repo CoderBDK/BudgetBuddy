@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
+import com.coderbdk.budgetbuddy.data.model.BudgetCategory
+import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import kotlinx.coroutines.flow.Flow
 
@@ -28,4 +30,27 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions ORDER BY date DESC")
     fun getPagedTransactions(): PagingSource<Int, Transaction>
+
+    @Query(
+        """
+        SELECT * FROM transactions
+        WHERE (:query IS NULL OR amount LIKE '%' || :query || '%') 
+        AND (:type IS NULL OR type = :type) 
+        AND (:category IS NULL OR category = :category)
+        AND (:period IS NULL OR period = :period)
+        AND (:startDate IS NULL OR date >= :startDate)
+        AND (:endDate IS NULL OR date <= :endDate)
+        AND (:isRecurring IS NULL OR is_recurring = :isRecurring)
+        ORDER BY date DESC
+        """
+    )
+    fun getFilteredTransactionsPaging(
+        query: String?,
+        type: TransactionType?,
+        category: BudgetCategory?,
+        period: BudgetPeriod?,
+        startDate: Long?,
+        endDate: Long?,
+        isRecurring: Boolean?
+    ): PagingSource<Int, Transaction>
 }

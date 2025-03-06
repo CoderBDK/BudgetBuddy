@@ -3,9 +3,11 @@ package com.coderbdk.budgetbuddy.data.repository.impl
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingSource
 import com.coderbdk.budgetbuddy.data.db.dao.BudgetDao
 import com.coderbdk.budgetbuddy.data.db.dao.TransactionDao
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
+import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +36,26 @@ class DefaultTransactionRepository @Inject constructor(
         return Pager(
             config = PagingConfig(pageSize = 30, enablePlaceholders = false),
             pagingSourceFactory = { transactionDao.getPagedTransactions() }
+        ).flow
+    }
+
+    override fun getFilteredTransactions(transactionFilter: TransactionFilter): Flow<PagingData<Transaction>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                transactionDao.getFilteredTransactionsPaging(
+                    transactionFilter.query,
+                    transactionFilter.type,
+                    transactionFilter.category,
+                    transactionFilter.period,
+                    transactionFilter.startDate,
+                    transactionFilter.endDate,
+                    transactionFilter.isRecurring
+                )
+            }
         ).flow
     }
 }
