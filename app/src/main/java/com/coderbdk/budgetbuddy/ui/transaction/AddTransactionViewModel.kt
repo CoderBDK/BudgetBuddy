@@ -65,7 +65,7 @@ class AddTransactionViewModel @Inject constructor(
             }
 
             if (transaction.type == TransactionType.EXPENSE) {
-                if (!doesBudgetExistUseCase.invoke(
+                if (!doesBudgetExistUseCase(
                         transaction.category!!,
                         transaction.period!!
                     )
@@ -76,7 +76,7 @@ class AddTransactionViewModel @Inject constructor(
             }
 
             _uiState.update { it.copy(isSaving = true) }
-            insertTransactionWithBudgetIncrementUseCase.invoke(transaction)
+            insertTransactionWithBudgetIncrementUseCase(transaction)
             delay(1000)
             _uiState.update { it.copy(isSaving = false) }
         }

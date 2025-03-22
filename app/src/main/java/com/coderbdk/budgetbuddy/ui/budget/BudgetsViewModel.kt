@@ -38,7 +38,7 @@ class BudgetViewModel @Inject constructor(
 
     fun addBudget(category: BudgetCategory, period: BudgetPeriod, amount: Double) {
         viewModelScope.launch {
-            val existingBudget = getBudgetByCategoryPeriodUseCase.invoke(category, period)
+            val existingBudget = getBudgetByCategoryPeriodUseCase(category, period)
             if (existingBudget != null) {
                 _uiState.update {
                     it.copy(
@@ -51,7 +51,7 @@ class BudgetViewModel @Inject constructor(
                     )
                 }
             } else {
-                insertBudgetUseCase.invoke(Budget(0, category, period, amount, 0.0))
+                insertBudgetUseCase(Budget(0, category, period, amount, 0.0))
             }
         }
     }
@@ -73,7 +73,7 @@ class BudgetViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value.newBudget?.let { budget ->
                 try {
-                    updateBudgetUseCase.invoke(budget)
+                    updateBudgetUseCase(budget)
                     resetBudgetState()
                 } catch (e: Exception) {
                     resetBudgetState()

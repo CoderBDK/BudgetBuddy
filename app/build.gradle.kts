@@ -44,7 +44,8 @@ android {
 }
 
 dependencies {
-
+    // kotlin reflect
+    implementation(kotlin("reflect"))
     // paging
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.paging.compose)
@@ -94,5 +95,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(kotlin("reflect"))
+    // test
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.48")
+    kspAndroidTest("com.google.dagger:hilt-android-testing:2.48")
 }
