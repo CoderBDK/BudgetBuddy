@@ -36,8 +36,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
+import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
 import com.coderbdk.budgetbuddy.ui.main.FabAction
@@ -51,6 +52,7 @@ fun BudgetScreen(viewModel: BudgetViewModel = hiltViewModel(), mainViewModel: Ma
     val budgets by viewModel.budgetsFlow.collectAsStateWithLifecycle(emptyList())
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val fabAction by mainViewModel.fabAction.collectAsState()
+    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -87,9 +89,10 @@ fun BudgetScreen(viewModel: BudgetViewModel = hiltViewModel(), mainViewModel: Ma
 
     if (showDialog) {
         AddBudgetDialog(
+            expenseCategoryList = expenseCategoryList,
             onDismiss = { showDialog = false },
             onSave = { category, amount, period ->
-                viewModel.addBudget(category, period, amount)
+                viewModel.addBudget(category.id, period, amount)
                 showDialog = false
             }
         )
@@ -97,7 +100,8 @@ fun BudgetScreen(viewModel: BudgetViewModel = hiltViewModel(), mainViewModel: Ma
 }
 
 @Composable
-fun BudgetItem(budget: Budget) {
+fun BudgetItem(budgetWithCategory: BudgetWithCategory) {
+    val budget = budgetWithCategory.budget
     val spentAmount = budget.spentAmount
     val totalBudget = budget.limitAmount
     val progress = (if (totalBudget > 0) spentAmount / totalBudget else 0f).toFloat()
@@ -114,7 +118,7 @@ fun BudgetItem(budget: Budget) {
                 )
             },
             headlineContent = {
-                Text("${budget.category}: ${spentAmount}/${totalBudget}")
+                Text("${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}")
             },
             supportingContent = {
                 LinearProgressIndicator(
@@ -133,16 +137,17 @@ fun BudgetItem(budget: Budget) {
 
 @Composable
 fun AddBudgetDialog(
+    expenseCategoryList: List<ExpenseCategory>,
     onDismiss: () -> Unit,
-    onSave: (BudgetCategory, Double, BudgetPeriod) -> Unit
+    onSave: (ExpenseCategory, Double, BudgetPeriod) -> Unit
 ) {
-    var category by remember { mutableStateOf(BudgetCategory.FOOD) }
+    var category by remember { mutableStateOf(expenseCategoryList[0]) }
     var amount by remember { mutableStateOf("") }
     var period by remember { mutableStateOf(BudgetPeriod.DAILY) }
     var selectedPeriodIndex by remember { mutableIntStateOf(BudgetPeriod.valueOf(period.name).ordinal) }
-    var selectedCategoryIndex by remember { mutableIntStateOf(BudgetCategory.valueOf(category.name).ordinal) }
+    var selectedCategoryIndex by remember { mutableIntStateOf(0) }
     val categoryEntries = remember {
-        BudgetCategory.entries.map {
+        expenseCategoryList.map {
             DropDownEntry(
                 title = it.name.lowercase().capitalizeFirstLetter(),
                 data = it

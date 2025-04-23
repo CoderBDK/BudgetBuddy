@@ -3,16 +3,19 @@ package com.coderbdk.budgetbuddy.ui.budget
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
-import com.coderbdk.budgetbuddy.domain.budget.usecase.GetBudgetByCategoryPeriodUseCase
-import com.coderbdk.budgetbuddy.domain.budget.usecase.GetBudgetsUseCase
-import com.coderbdk.budgetbuddy.domain.budget.usecase.InsertBudgetUseCase
-import com.coderbdk.budgetbuddy.domain.budget.usecase.UpdateBudgetUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.budget.GetBudgetByCategoryPeriodUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.budget.GetBudgetsWithExpenseCategoryUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.budget.InsertBudgetUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.budget.UpdateBudgetUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetAllExpenseCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,33 +28,41 @@ data class BudgetUiState(
 
 @HiltViewModel
 class BudgetViewModel @Inject constructor(
-    getBudgetsUseCase: GetBudgetsUseCase,
+    getBudgetsWithExpenseCategoryUseCase: GetBudgetsWithExpenseCategoryUseCase,
     private val getBudgetByCategoryPeriodUseCase: GetBudgetByCategoryPeriodUseCase,
     private val insertBudgetUseCase: InsertBudgetUseCase,
-    private val updateBudgetUseCase: UpdateBudgetUseCase
+    private val updateBudgetUseCase: UpdateBudgetUseCase,
+    getAllExpenseCategoriesUseCase: GetAllExpenseCategoriesUseCase
 ) : ViewModel() {
 
-    val budgetsFlow = getBudgetsUseCase.invoke()
+    val budgetsFlow = getBudgetsWithExpenseCategoryUseCase.invoke()
 
     private val _uiState = MutableStateFlow(BudgetUiState())
     val uiState: StateFlow<BudgetUiState> = _uiState.asStateFlow()
 
-    fun addBudget(category: BudgetCategory, period: BudgetPeriod, amount: Double) {
+    val expenseCategories: StateFlow<List<ExpenseCategory>> =
+        getAllExpenseCategoriesUseCase().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    fun addBudget(categoryId: Int, period: BudgetPeriod, amount: Double) {
         viewModelScope.launch {
-            val existingBudget = getBudgetByCategoryPeriodUseCase(category, period)
+            val existingBudget = getBudgetByCategoryPeriodUseCase(categoryId, period)
             if (existingBudget != null) {
                 _uiState.update {
                     it.copy(
                         budgetExists = true,
                         newBudget = existingBudget.copy(
-                            category = category,
+                            expenseCategoryId = categoryId,
                             period = period,
                             limitAmount = amount
                         )
                     )
                 }
             } else {
-                insertBudgetUseCase(Budget(0, category, period, amount, 0.0))
+                insertBudgetUseCase(Budget(0, categoryId, period, amount, 0.0, 0, 0))
             }
         }
     }

@@ -2,12 +2,6 @@ package com.coderbdk.budgetbuddy
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.coderbdk.budgetbuddy.data.repository.TransactionRepository
-import com.coderbdk.budgetbuddy.data.repository.impl.DefaultTransactionRepository
-import com.coderbdk.budgetbuddy.domain.budget.usecase.GetBudgetsUseCase
-import com.coderbdk.budgetbuddy.domain.transaction.usecase.GetRecentTransactionsUseCase
-import com.coderbdk.budgetbuddy.domain.transaction.usecase.GetTotalTransactionAmountUseCase
-import com.coderbdk.budgetbuddy.ui.home.HomeViewModel
 
 import org.junit.Test
 import org.junit.runner.RunWith

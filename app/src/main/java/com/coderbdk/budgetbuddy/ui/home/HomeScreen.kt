@@ -24,12 +24,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,7 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
+import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionType
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 import com.coderbdk.budgetbuddy.utils.CategoryColorUtils
@@ -67,7 +71,11 @@ fun HomeScreen(
     val recentTransactions by viewModel.recentTransactionsFlow.collectAsStateWithLifecycle(emptyList())
     val totalExpense by viewModel.totalExpense.collectAsStateWithLifecycle(0.0)
     val totalIncome by viewModel.totalIncome.collectAsStateWithLifecycle(0.0)
+    val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        viewModel.initCategory(context)
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -93,24 +101,26 @@ fun HomeScreen(
 }
 
 @Composable
-private fun ExpenseChart(transactions: List<Transaction>) {
+private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
     if (transactions.isEmpty()) {
         return
     }
 
     val categoryTotals = remember {
         transactions
-            .filter { it.type != TransactionType.INCOME }
-            .groupBy { it.category }.mapValues { entry ->
-                entry.value.sumOf { it.amount }
+            .filter { it.transaction.type != TransactionType.INCOME }
+            .groupBy { it.expenseCategory?.name }.mapValues { entry ->
+                entry.value.sumOf { it.transaction.amount }
             }
     }
     val categoryIntColors = remember {
-        CategoryColorUtils.categoryIntColors
+       transactions.associate {
+           it.expenseCategory?.name to it.expenseCategory?.colorCode
+       }
     }
 
     val entries = remember {
-        categoryTotals.map { PieEntry(it.value.toFloat(), "", it.key?.name ?: "") }
+        categoryTotals.map { PieEntry(it.value.toFloat(), "", it.key ?: "") }
     }
 
     val pieColors = remember {
@@ -135,12 +145,12 @@ private fun ExpenseChart(transactions: List<Transaction>) {
             .take(maxVisibleLabels)
             .map {
                 LegendEntry(
-                    it.key?.name,
+                    it.key.toString(),
                     Legend.LegendForm.SQUARE,
                     10f,
                     2f,
                     null,
-                    categoryIntColors[it.key?.name] ?: Color.Gray.toArgb()
+                    categoryIntColors[it.key.toString()] ?: Color.Gray.toArgb()
                 )
             }
     }
@@ -211,7 +221,7 @@ fun TotalBalanceCard(income: Double, expense: Double) {
 
 @Composable
 private fun RowScope.BudgetProgressSection(
-    budgets: List<Budget>
+    budgets: List<BudgetWithCategory>
 ) {
     Column(
         modifier = Modifier
@@ -220,12 +230,13 @@ private fun RowScope.BudgetProgressSection(
     ) {
         Text("Budget Overview", fontSize = 18.sp, fontWeight = FontWeight.Bold)
 
-        budgets.take(3).forEach { budget ->
+        budgets.take(3).forEach { budgetWithCategory ->
+            val budget = budgetWithCategory.budget
             val spentAmount = budget.spentAmount
             val totalBudget = budget.limitAmount
             val progress = (if (totalBudget > 0) spentAmount / totalBudget else 0f).toFloat()
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                Text("${budget.category}: ${spentAmount}/${totalBudget}", fontSize = 14.sp)
+                Text("${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}", fontSize = 14.sp)
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
@@ -240,7 +251,7 @@ private fun RowScope.BudgetProgressSection(
 
 
 private fun LazyListScope.recentTransactionsSection(
-    transactions: List<Transaction>,
+    transactions: List<TransactionWithBothCategories>,
     gotoTransactionDetails: () -> Unit
 ) {
     item {

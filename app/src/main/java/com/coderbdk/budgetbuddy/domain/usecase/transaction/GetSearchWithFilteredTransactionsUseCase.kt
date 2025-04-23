@@ -1,8 +1,7 @@
-package com.coderbdk.budgetbuddy.domain.transaction.usecase
+package com.coderbdk.budgetbuddy.domain.usecase.transaction
 
 import androidx.paging.PagingData
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
@@ -16,7 +15,8 @@ class GetSearchWithFilteredTransactionsUseCase @Inject constructor(
     operator fun invoke(
         query: String?,
         type: TransactionType?,
-        category: BudgetCategory?,
+        expenseCategoryId: Int?,
+        incomeCategoryId: Int?,
         period: BudgetPeriod?,
         startDate: Long?,
         endDate: Long?,
@@ -26,7 +26,8 @@ class GetSearchWithFilteredTransactionsUseCase @Inject constructor(
             TransactionFilter(
                 query = query,
                 type = type,
-                category = category,
+                expenseCategoryId = expenseCategoryId,
+                incomeCategoryId = incomeCategoryId,
                 period = period,
                 startDate = startDate,
                 endDate = endDate,

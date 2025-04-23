@@ -9,6 +9,7 @@ import com.coderbdk.budgetbuddy.data.db.dao.TransactionDao
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.data.repository.TransactionRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -28,6 +29,9 @@ class DefaultTransactionRepository @Inject constructor(
         return transactionDao.getRecentTransactions(count)
     }
 
+    override fun getRecentTransactionsWithBothCategories(count: Int): Flow<List<TransactionWithBothCategories>> {
+        return transactionDao.getRecentTransactionsWithBothCategories(count)
+    }
     override fun getTotalTransactionAmount(type: TransactionType): Flow<Double> {
         return transactionDao.getTotalTransactionAmount(type)
     }
@@ -49,7 +53,8 @@ class DefaultTransactionRepository @Inject constructor(
                 transactionDao.getFilteredTransactionsPaging(
                     transactionFilter.query,
                     transactionFilter.type,
-                    transactionFilter.category,
+                    transactionFilter.expenseCategoryId,
+                    transactionFilter.incomeCategoryId,
                     transactionFilter.period,
                     transactionFilter.startDate,
                     transactionFilter.endDate,

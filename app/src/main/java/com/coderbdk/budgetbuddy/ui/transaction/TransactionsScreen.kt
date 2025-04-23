@@ -47,7 +47,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.ui.main.Screen
@@ -62,9 +63,13 @@ fun TransactionsScreen(
 ) {
     val transactions = viewModel.filteredTransactions.collectAsLazyPagingItems()
     val filter by viewModel.filter.collectAsState()
+    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
+    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
 
     Column(modifier = Modifier.fillMaxSize()) {
         SearchAndFilterBar(
+            expenseCategoryList = expenseCategoryList,
+            incomeCategoryList = incomeCategoryList,
             filter = filter,
             onSearchQueryChange = { viewModel.setSearchQuery(it) },
             onFilterChange = { viewModel.updateFilter(it) }
@@ -143,6 +148,8 @@ fun ErrorMessage(message: String, onRetry: () -> Unit) {
 
 @Composable
 fun SearchAndFilterBar(
+    expenseCategoryList: List<ExpenseCategory>,
+    incomeCategoryList: List<IncomeCategory>,
     filter: TransactionFilter,
     onSearchQueryChange: (String) -> Unit,
     onFilterChange: (TransactionFilter) -> Unit
@@ -168,12 +175,47 @@ fun SearchAndFilterBar(
                 onOptionSelected = { onFilterChange(filter.copy(type = it)) }
             )
 
-            FilterDropdown(
-                label = "Category",
-                options = BudgetCategory.entries,
-                selectedOption = filter.category,
-                onOptionSelected = { onFilterChange(filter.copy(category = it)) }
-            )
+            if(filter.type == TransactionType.EXPENSE) {
+                FilterDropdown(
+                    label = "Category",
+                    options = expenseCategoryList,
+                    selectedOption = expenseCategoryList.find { it.id == filter.expenseCategoryId },
+                    onOptionSelected = { onFilterChange(filter.copy(expenseCategoryId = it?.id, incomeCategoryId = null)) },
+                    selectedContent = {
+                        if (it != null) {
+                            Text(text = it.name)
+                        } else {
+                            Text("Category")
+                        }
+                    },
+                    itemContent = {
+                        if (it != null) {
+                            Text(text = it.name)
+                        }
+                    }
+                )
+
+            }else {
+                FilterDropdown(
+                    label = "Category",
+                    options = incomeCategoryList,
+                    selectedOption = incomeCategoryList.find { it.id == filter.incomeCategoryId },
+                    onOptionSelected = { onFilterChange(filter.copy(incomeCategoryId = it?.id, expenseCategoryId = null)) },
+                    selectedContent = {
+                        if (it != null) {
+                            Text(text = it.name)
+                        } else {
+                            Text("Category")
+                        }
+                    },
+                    itemContent = {
+                        if (it != null) {
+                            Text(text = it.name)
+                        }
+                    }
+                )
+
+            }
 
             FilterDropdown(
                 label = "Recurring",
@@ -217,6 +259,44 @@ fun <T> FilterDropdown(
                 DropdownMenuItem(text = { Text(option.toString()) }, onClick = {
                     onOptionSelected(option)
                     selectedText = option.toString()
+                    expanded = false
+                })
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> FilterDropdown(
+    label: String,
+    options: List<T>,
+    selectedOption: T?,
+    onOptionSelected: (T?) -> Unit,
+    selectedContent: @Composable (T?) -> Unit,
+    itemContent: @Composable (T?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.wrapContentSize()) {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.padding(4.dp)
+        ) {
+            selectedContent(selectedOption)
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(text = { Text(label) }, onClick = {
+                onOptionSelected(null)
+                expanded = false
+            })
+            options.forEach { option ->
+                DropdownMenuItem(text = { itemContent(option)}, onClick = {
+                    onOptionSelected(option)
                     expanded = false
                 })
             }

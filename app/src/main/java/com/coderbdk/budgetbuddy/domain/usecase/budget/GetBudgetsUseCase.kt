@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.domain.budget.usecase
+package com.coderbdk.budgetbuddy.domain.usecase.budget
 
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.repository.BudgetRepository

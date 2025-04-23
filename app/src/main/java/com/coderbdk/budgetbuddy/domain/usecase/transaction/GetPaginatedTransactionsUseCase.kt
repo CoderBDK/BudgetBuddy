@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.domain.transaction.usecase
+package com.coderbdk.budgetbuddy.domain.usecase.transaction
 
 import androidx.paging.PagingData
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction

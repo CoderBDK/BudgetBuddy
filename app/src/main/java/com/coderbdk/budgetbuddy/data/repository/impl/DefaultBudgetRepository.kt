@@ -2,8 +2,8 @@ package com.coderbdk.budgetbuddy.data.repository.impl
 
 import com.coderbdk.budgetbuddy.data.db.dao.BudgetDao
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
+import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.repository.BudgetRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -19,35 +19,39 @@ class DefaultBudgetRepository @Inject constructor(
         budgetDao.updateBudget(budget)
     }
 
-    override suspend fun doesBudgetExist(category: BudgetCategory, period: BudgetPeriod): Boolean {
-        return budgetDao.doesBudgetExist(category, period)
+    override suspend fun doesBudgetExist(categoryId: Int, period: BudgetPeriod): Boolean {
+        return budgetDao.doesBudgetExist(categoryId, period)
     }
 
     override suspend fun incrementSpentAmount(
-        category: BudgetCategory,
+        categoryId: Int,
         period: BudgetPeriod,
         amount: Double
     ) {
-        budgetDao.incrementSpentAmount(category, period, amount)
+        budgetDao.incrementSpentAmount(categoryId, period, amount)
     }
 
     override suspend fun decrementSpentAmount(
-        category: BudgetCategory,
+        categoryId: Int,
         period: BudgetPeriod,
         amount: Double
     ) {
-        budgetDao.decrementSpentAmount(category, period, amount)
+        budgetDao.decrementSpentAmount(categoryId, period, amount)
     }
 
     override suspend fun getBudgetByCategoryAndPeriod(
-        category: BudgetCategory,
+        categoryId: Int,
         period: BudgetPeriod
     ): Budget? {
-        return budgetDao.getBudgetByCategoryAndPeriod(category, period)
+        return budgetDao.getBudgetByCategoryAndPeriod(categoryId, period)
     }
 
     override fun getBudgets(): Flow<List<Budget>> {
         return budgetDao.getBudgets()
+    }
+
+    override fun getBudgetsWithCategory(): Flow<List<BudgetWithCategory>> {
+        return budgetDao.getBudgetsWithCategory()
     }
 
 }

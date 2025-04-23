@@ -1,5 +1,6 @@
 package com.coderbdk.budgetbuddy.ui.transaction
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -39,8 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
@@ -57,17 +60,26 @@ fun TransactionDetailsScreen(
     transaction: Transaction,
     viewModel: TransactionDetailsViewModel = hiltViewModel()
 ) {
+    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
+    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
+
     Column(
         Modifier.fillMaxSize()
     ) {
         TransactionDetailsContent(
+            expenseCategoryList,
+            incomeCategoryList,
             transaction
         )
     }
 }
 
 @Composable
-fun TransactionDetailsContent(transaction: Transaction) {
+fun TransactionDetailsContent(
+    expenseCategoryList: List<ExpenseCategory>,
+    incomeCategoryList: List<IncomeCategory>,
+    transaction: Transaction
+) {
     ElevatedCard(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(2.dp),
@@ -83,8 +95,7 @@ fun TransactionDetailsContent(transaction: Transaction) {
                 modifier = Modifier
                     .size(40.dp)
                     .background(
-                        if (transaction.type == TransactionType.INCOME) Color(0xFF4CAF50) else CategoryColorUtils.categoryColors[transaction.category?.name]
-                            ?: Color.LightGray,
+                        Color.LightGray,
                         CircleShape
                     )
             )
@@ -92,18 +103,18 @@ fun TransactionDetailsContent(transaction: Transaction) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                if (transaction.category == null) {
+                if (transaction.expenseCategoryId == null) {
                     Text(transaction.type.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 } else {
                     Text(
-                        transaction.category.name,
+                        transaction.expenseCategoryId.toString(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                 }
 
 
-                Text(dateFormatter.format(Date(transaction.date)), fontSize = 12.sp)
+                Text(dateFormatter.format(Date(transaction.transactionDate)), fontSize = 12.sp)
             }
             Text(
                 text = if (transaction.type == TransactionType.INCOME) "+$${transaction.amount}" else "-$${transaction.amount}",
@@ -118,13 +129,15 @@ fun TransactionDetailsContent(transaction: Transaction) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            if(expenseCategoryList.isEmpty() || incomeCategoryList.isEmpty())return@Column
             TransactionDetailsUpdateContent(
+                expenseCategoryList,
+                incomeCategoryList,
                 uiState = TransactionUiState(
                     type = transaction.type,
-                    category = transaction.category ?: BudgetCategory.FOOD,
                     period = transaction.period ?: BudgetPeriod.DAILY
                 ),
-                uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {})
+                uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {}, {})
             )
         }
 
@@ -148,6 +161,8 @@ fun TransactionDetailsContent(transaction: Transaction) {
 
 @Composable
 fun TransactionDetailsUpdateContent(
+    expenseCategoryList: List<ExpenseCategory>,
+    incomeCategoryList: List<IncomeCategory>,
     uiState: TransactionUiState,
     uiEvent: TransactionUiEvent
 ) {
@@ -160,16 +175,25 @@ fun TransactionDetailsUpdateContent(
             )
         }
     }
-    var selectedCategoryIndex by remember { mutableIntStateOf(BudgetCategory.valueOf(uiState.category.name).ordinal) }
-    val categoryEntries = remember {
-        BudgetCategory.entries.map {
+    var selectedCategoryIndex by remember { mutableIntStateOf(0) }
+
+    val expenseCategoryEntries = remember {
+        expenseCategoryList.map {
             DropDownEntry(
                 title = it.name.lowercase().capitalizeFirstLetter(),
                 data = it
             )
         }
     }
-    var selectedPeriodIndex by remember { mutableIntStateOf(BudgetPeriod.valueOf(uiState.period.name).ordinal) }
+    val incomeCategoryEntries = remember {
+        incomeCategoryList.map {
+            DropDownEntry(
+                title = it.name.lowercase().capitalizeFirstLetter(),
+                data = it
+            )
+        }
+    }
+    var selectedPeriodIndex by remember { mutableIntStateOf(0) }
     val periodEntries = remember {
         BudgetPeriod.entries.map {
             DropDownEntry(
@@ -193,11 +217,11 @@ fun TransactionDetailsUpdateContent(
         DropDownMenu(
             modifier = Modifier,
             title = "Choose Transaction Category",
-            entries = categoryEntries,
+            entries = expenseCategoryEntries,
             selectedIndex = selectedCategoryIndex,
             onSelected = { data, index ->
                 selectedCategoryIndex = index
-                uiEvent.onCategoryChange(data)
+                uiEvent.onExpenseCategoryChange(data)
             }
         )
         Spacer(Modifier.padding(8.dp))
@@ -211,7 +235,20 @@ fun TransactionDetailsUpdateContent(
                 uiEvent.onPeriodChange(data)
             }
         )
+    } else {
+        Spacer(Modifier.padding(8.dp))
+        DropDownMenu(
+            modifier = Modifier,
+            title = "Choose Transaction Category",
+            entries = incomeCategoryEntries,
+            selectedIndex = selectedCategoryIndex,
+            onSelected = { data, index ->
+                selectedCategoryIndex = index
+                uiEvent.onIncomeCategoryChange(data)
+            }
+        )
     }
+
 }
 
 @Preview(showBackground = true)
@@ -220,13 +257,14 @@ fun TransactionDetailsPreview() {
     BudgetBuddyTheme {
         Column(Modifier.padding(8.dp)) {
             TransactionDetailsContent(
+                emptyList(),
+                emptyList(),
                 Transaction(
                     id = 0,
                     type = TransactionType.INCOME,
                     amount = 0.0,
-                    category = BudgetCategory.FOOD,
                     period = BudgetPeriod.DAILY,
-                    date = System.currentTimeMillis()
+                    transactionDate = System.currentTimeMillis()
                 )
 
             )

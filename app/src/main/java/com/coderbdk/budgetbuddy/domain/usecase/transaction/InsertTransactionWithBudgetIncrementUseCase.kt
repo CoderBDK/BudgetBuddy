@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.domain.transaction.usecase
+package com.coderbdk.budgetbuddy.domain.usecase.transaction
 
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionType
@@ -14,16 +14,23 @@ class InsertTransactionWithBudgetIncrementUseCase @Inject constructor(
         transaction: Transaction
     ) {
         if (transaction.type == TransactionType.EXPENSE) {
-            budgetRepository.incrementSpentAmount(
-                transaction.category!!,
-                transaction.period!!,
-                transaction.amount
-            )
+
+            if(transaction.expenseCategoryId != null && transaction.period != null) {
+                if(budgetRepository.doesBudgetExist(categoryId = transaction.expenseCategoryId, period = transaction.period)) {
+                    budgetRepository.incrementSpentAmount(
+                        transaction.expenseCategoryId,
+                        transaction.period,
+                        transaction.amount
+                    )
+                }
+
+            }
+
             transactionRepository.insertTransaction(transaction)
         } else {
             transactionRepository.insertTransaction(
                 transaction.copy(
-                    category = null,
+                    expenseCategoryId = null,
                     period = null
                 )
             )

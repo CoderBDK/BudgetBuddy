@@ -27,7 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.coderbdk.budgetbuddy.data.model.BudgetCategory
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.model.DefaultExpenseCategory
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 
@@ -97,7 +98,7 @@ fun <T> DropDownMenu(
     }
 }
 
-private val categories = BudgetCategory.entries.map {
+private val categories = DefaultExpenseCategory.entries.map {
     DropDownEntry(
         title = it.name.lowercase().capitalizeFirstLetter(),
         data = it

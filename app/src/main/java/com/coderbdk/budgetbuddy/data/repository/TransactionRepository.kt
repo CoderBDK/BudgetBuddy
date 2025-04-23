@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
@@ -11,6 +12,7 @@ interface TransactionRepository {
     fun getTransactions(type: TransactionType): Flow<List<Transaction>>
     fun getTotalTransactionAmount(type: TransactionType): Flow<Double>
     fun getRecentTransactions(count: Int): Flow<List<Transaction>>
+    fun getRecentTransactionsWithBothCategories(count: Int): Flow<List<TransactionWithBothCategories>>
     fun getPagedTransactions(): Flow<PagingData<Transaction>>
     fun getFilteredTransactions(transactionFilter: TransactionFilter): Flow<PagingData<Transaction>>
 }
