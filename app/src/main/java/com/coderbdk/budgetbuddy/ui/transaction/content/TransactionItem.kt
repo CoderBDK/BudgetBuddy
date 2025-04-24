@@ -111,8 +111,8 @@ fun TransactionItem(transaction: TransactionWithBothCategories, gotoDetails: () 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                if (transaction.transaction.expenseCategoryId == null) {
-                    Text(transaction.transaction.type.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                if (transaction.transaction.type ==  TransactionType.EXPENSE) {
+                    Text(transaction.expenseCategory?.name.toString(), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 } else {
                     Text(
                         transaction.incomeCategory?.name.toString(),
