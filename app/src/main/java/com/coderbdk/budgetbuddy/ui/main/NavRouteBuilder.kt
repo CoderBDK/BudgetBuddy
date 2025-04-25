@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.ui.app
+package com.coderbdk.budgetbuddy.ui.main
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController

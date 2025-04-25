@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.ui.app
+package com.coderbdk.budgetbuddy.ui.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

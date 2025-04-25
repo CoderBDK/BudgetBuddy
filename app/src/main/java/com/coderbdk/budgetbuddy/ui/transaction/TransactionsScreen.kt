@@ -51,7 +51,7 @@ import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
-import com.coderbdk.budgetbuddy.ui.app.Screen
+import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

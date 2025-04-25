@@ -35,13 +35,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
-import com.coderbdk.budgetbuddy.ui.app.FabAction
-import com.coderbdk.budgetbuddy.ui.app.MainViewModel
+import com.coderbdk.budgetbuddy.ui.main.FabAction
+import com.coderbdk.budgetbuddy.ui.main.MainViewModel
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 
 
