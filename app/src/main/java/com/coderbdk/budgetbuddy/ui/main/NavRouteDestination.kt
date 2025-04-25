@@ -1,6 +1,7 @@
 package com.coderbdk.budgetbuddy.ui.main
 
 import androidx.navigation.NavDestination
+import com.coderbdk.budgetbuddy.data.model.TransactionType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
@@ -32,6 +33,8 @@ sealed class Screen(
     @Serializable
     data class TransactionDetails(val transactionData: String) : Screen("Transaction Details")
 
+    @Serializable
+    data class CategoryManage(val type: TransactionType): Screen("CategoryManage")
 }
 
 private val titleMap by lazy {
@@ -52,6 +55,7 @@ private fun getTitle(it: KClass<out Screen>): String? {
                         String::class -> ""
                         Int::class -> 0
                         Boolean::class -> false
+                        TransactionType::class -> TransactionType.INCOME
                         else -> null
                     }
                 }

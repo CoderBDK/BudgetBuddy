@@ -43,6 +43,7 @@ fun <T> DropDownMenu(
     title: String,
     entries: List<DropDownEntry<T>>,
     selectedIndex: Int,
+    trailingContent: @Composable (() -> Unit)? = null,
     onSelected: (T, Int) -> Unit
 ) {
     var expandMenu by remember { mutableStateOf(false) }
@@ -74,7 +75,8 @@ fun <T> DropDownMenu(
             },
             supportingContent = {
                 Text(entries[selectedIndex].title)
-            }
+            },
+            trailingContent = trailingContent
         )
 
         DropdownMenu(

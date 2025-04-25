@@ -11,8 +11,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
@@ -62,8 +67,9 @@ fun AddTransactionScreen(
     if(expenseCategoryList.isEmpty())return
 
     AddTransactionScreen(
-        expenseCategoryList,
-        incomeCategoryList,
+        navController = navController,
+       expenseCategoryList = expenseCategoryList,
+       incomeCategoryList =  incomeCategoryList,
         uiState = uiState,
         uiEvent = TransactionUiEvent(
             onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
@@ -80,6 +86,7 @@ fun AddTransactionScreen(
 
 @Composable
 fun AddTransactionScreen(
+    navController: NavController,
     expenseCategoryList: List<ExpenseCategory>,
     incomeCategoryList: List<IncomeCategory>,
     uiState: TransactionUiState,
@@ -156,7 +163,7 @@ fun AddTransactionScreen(
         Spacer(Modifier.padding(8.dp))
         DropDownMenu(
             modifier = Modifier,
-            title = "Choose Transaction Type",
+            title = "Transaction Type",
             entries = typeEntries,
             selectedIndex = selectedTypeIndex,
             onSelected = { data, index ->
@@ -166,11 +173,21 @@ fun AddTransactionScreen(
         )
         if(uiState.type == TransactionType.EXPENSE) {
             Spacer(Modifier.padding(8.dp))
+
             DropDownMenu(
                 modifier = Modifier,
-                title = "Choose Transaction Category",
+                title = "Transaction Category",
                 entries = expenseCategoryEntries,
                 selectedIndex = selectedCategoryIndex,
+                trailingContent = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.CategoryManage(TransactionType.EXPENSE))
+                        }
+                    ) {
+                        Icon(Icons.Default.Settings,"manage")
+                    }
+                },
                 onSelected = { data, index ->
                     selectedCategoryIndex = index
                     uiEvent.onExpenseCategoryChange(data)
@@ -179,7 +196,7 @@ fun AddTransactionScreen(
             Spacer(Modifier.padding(8.dp))
             DropDownMenu(
                 modifier = Modifier,
-                title = "Choose Transaction Period",
+                title = "Transaction Period",
                 entries = periodEntries,
                 selectedIndex = selectedPeriodIndex,
                 onSelected = { data, index ->
@@ -194,6 +211,15 @@ fun AddTransactionScreen(
                 title = "Choose Transaction Category",
                 entries = incomeCategoryEntries,
                 selectedIndex = selectedCategoryIndex,
+                trailingContent = {
+                    IconButton(
+                        onClick = {
+                            navController.navigate(Screen.CategoryManage(TransactionType.INCOME))
+                        }
+                    ) {
+                        Icon(Icons.Default.Settings,"manage")
+                    }
+                },
                 onSelected = { data, index ->
                     selectedCategoryIndex = index
                     uiEvent.onIncomeCategoryChange(data)
@@ -225,6 +251,7 @@ fun AddTransactionScreen(
 fun AddTransactionPreview(modifier: Modifier = Modifier) {
     BudgetBuddyTheme {
         AddTransactionScreen(
+            navController = rememberNavController(),
             expenseCategoryList = emptyList(),
             incomeCategoryList = emptyList(),
             uiState = TransactionUiState(),
