@@ -39,14 +39,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.coderbdk.budgetbuddy.data.db.entity.Budget
-import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
-import com.coderbdk.budgetbuddy.ui.main.Screen
+import com.coderbdk.budgetbuddy.ui.app.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
-import com.coderbdk.budgetbuddy.utils.CategoryColorUtils
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.LegendEntry
