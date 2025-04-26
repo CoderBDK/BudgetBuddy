@@ -30,6 +30,6 @@ class DefaultExpenseCategoryRepository @Inject constructor(
     }
 
     override suspend fun deleteExpenseCategory(categoryId: Int) {
-
+        expenseCategoryDao.deleteExpenseCategory(categoryId)
     }
 }

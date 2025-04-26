@@ -15,6 +15,9 @@ interface ExpenseCategoryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(categories: List<ExpenseCategory>)
 
+    @Query("DELETE FROM expense_categories WHERE id =:categoryId")
+    suspend fun deleteExpenseCategory(categoryId: Int)
+
     @Query("SELECT * FROM expense_categories WHERE isDefault = 1")
     suspend fun getDefaultCategories(): List<ExpenseCategory>
 

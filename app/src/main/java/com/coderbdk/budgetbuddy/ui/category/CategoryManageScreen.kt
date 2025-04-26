@@ -59,7 +59,9 @@ fun CategoryManageScreen(
     }
 
     Column(
-        Modifier.fillMaxSize().padding(8.dp)
+        Modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
         DropDownMenu(
             modifier = Modifier,
@@ -72,7 +74,7 @@ fun CategoryManageScreen(
 
                     }
                 ) {
-                    Icon(Icons.Default.Add,"add")
+                    Icon(Icons.Default.Add, "add")
                 }
             },
             onSelected = { _, index ->
@@ -82,8 +84,12 @@ fun CategoryManageScreen(
 
         when (typeEntries[selectedTypeIndex].data) {
             TransactionType.EXPENSE -> {
-                ExpenseCategoryList(expenseCategoryList)
+                ExpenseCategoryList(
+                    expenseCategoryList,
+                    onDelete = viewModel::deleteExpenseCategoryById
+                )
             }
+
             TransactionType.INCOME -> {
                 IncomeCategoryList(incomeCategoryList)
             }
@@ -92,16 +98,18 @@ fun CategoryManageScreen(
 }
 
 @Composable
-fun ExpenseCategoryList(list: List<ExpenseCategory>) {
+fun ExpenseCategoryList(list: List<ExpenseCategory>, onDelete: (Int) -> Unit) {
     LazyColumn {
         items(list) {
             ListItem(
                 leadingContent = {
-                    Box (
-                        Modifier.size(48.dp).background(
-                            Color(it.colorCode?:0xFFCCCCC),
-                            CircleShape
-                        )
+                    Box(
+                        Modifier
+                            .size(48.dp)
+                            .background(
+                                Color(it.colorCode ?: 0xFFCCCCC),
+                                CircleShape
+                            )
                     ) {
 
                     }
@@ -110,23 +118,27 @@ fun ExpenseCategoryList(list: List<ExpenseCategory>) {
                     Text(it.name)
                 },
                 supportingContent = {
-                    Text(it.description?:"---")
+                    Text(it.description ?: "---")
                 },
                 trailingContent = {
                     Column {
                         IconButton(
                             onClick = {
-
+                                onDelete(it.id)
                             }
                         ) {
-                            Icon(Icons.Default.Delete,"delete", tint = MaterialTheme.colorScheme.error)
+                            Icon(
+                                Icons.Default.Delete,
+                                "delete",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                         IconButton(
                             onClick = {
 
                             }
                         ) {
-                            Icon(Icons.Default.Edit,"edit")
+                            Icon(Icons.Default.Edit, "edit")
                         }
                     }
                 }
@@ -144,11 +156,13 @@ fun IncomeCategoryList(list: List<IncomeCategory>) {
         items(list) {
             ListItem(
                 leadingContent = {
-                    Box (
-                        Modifier.size(48.dp).background(
-                            Color(it.colorCode?:0xFFCCCCC),
-                            CircleShape
-                        )
+                    Box(
+                        Modifier
+                            .size(48.dp)
+                            .background(
+                                Color(it.colorCode ?: 0xFFCCCCC),
+                                CircleShape
+                            )
                     ) {
 
                     }
@@ -157,7 +171,7 @@ fun IncomeCategoryList(list: List<IncomeCategory>) {
                     Text(it.name)
                 },
                 supportingContent = {
-                    Text(it.description?:"---")
+                    Text(it.description ?: "---")
                 },
                 trailingContent = {
                     Column {
@@ -166,14 +180,18 @@ fun IncomeCategoryList(list: List<IncomeCategory>) {
 
                             }
                         ) {
-                            Icon(Icons.Default.Delete,"delete", tint = MaterialTheme.colorScheme.error)
+                            Icon(
+                                Icons.Default.Delete,
+                                "delete",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                         IconButton(
                             onClick = {
 
                             }
                         ) {
-                            Icon(Icons.Default.Edit,"edit")
+                            Icon(Icons.Default.Edit, "edit")
                         }
                     }
                 }
