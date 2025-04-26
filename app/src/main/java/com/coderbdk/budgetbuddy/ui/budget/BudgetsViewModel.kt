@@ -47,7 +47,12 @@ class BudgetViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun addBudget(categoryId: Int, period: BudgetPeriod, amount: Double) {
+    fun addBudget(
+        categoryId: Int,
+        period: BudgetPeriod,
+        amount: Double,
+        date: Pair<Long, Long>
+    ) {
         viewModelScope.launch {
             val existingBudget = getBudgetByCategoryPeriodUseCase(categoryId, period)
             if (existingBudget != null) {
@@ -62,7 +67,7 @@ class BudgetViewModel @Inject constructor(
                     )
                 }
             } else {
-                insertBudgetUseCase(Budget(0, categoryId, period, amount, 0.0, 0, 0))
+                insertBudgetUseCase(Budget(0, categoryId, period, amount, 0.0, date.first, date.second))
             }
         }
     }
