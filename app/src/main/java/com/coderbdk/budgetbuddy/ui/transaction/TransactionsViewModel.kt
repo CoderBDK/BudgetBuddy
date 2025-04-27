@@ -8,8 +8,10 @@ import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetAllExpenseCategoriesUseCase
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetAllIncomeCategoriesUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetSearchWithFilteredTransactionsBothCategoriesUseCase
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetSearchWithFilteredTransactionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,16 +30,17 @@ import javax.inject.Inject
 class TransactionsViewModel @Inject constructor(
     getSearchWithFilteredTransactionsUseCase: GetSearchWithFilteredTransactionsUseCase,
     getAllExpenseCategoriesUseCase: GetAllExpenseCategoriesUseCase,
-    getAllIncomeCategoriesUseCase: GetAllIncomeCategoriesUseCase
+    getAllIncomeCategoriesUseCase: GetAllIncomeCategoriesUseCase,
+    getSearchWithFilteredTransactionsBothCategoriesUseCase:GetSearchWithFilteredTransactionsBothCategoriesUseCase
 ) : ViewModel() {
     private val _filter = MutableStateFlow(TransactionFilter())
     val filter: StateFlow<TransactionFilter> = _filter.asStateFlow()
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val filteredTransactions: Flow<PagingData<Transaction>> = filter
+    val filteredTransactions: Flow<PagingData<TransactionWithBothCategories>> = filter
         .debounce(300)
         .flatMapLatest {
-            getSearchWithFilteredTransactionsUseCase(
+            getSearchWithFilteredTransactionsBothCategoriesUseCase(
                 it.query,
                 it.type,
                 it.expenseCategoryId,

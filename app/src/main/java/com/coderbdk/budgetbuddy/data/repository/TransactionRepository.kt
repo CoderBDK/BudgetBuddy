@@ -15,4 +15,5 @@ interface TransactionRepository {
     fun getRecentTransactionsWithBothCategories(count: Int): Flow<List<TransactionWithBothCategories>>
     fun getPagedTransactions(): Flow<PagingData<Transaction>>
     fun getFilteredTransactions(transactionFilter: TransactionFilter): Flow<PagingData<Transaction>>
+    fun getFilteredTransactionsWithBothCategoriesPaging(transactionFilter: TransactionFilter): Flow<PagingData<TransactionWithBothCategories>>
 }

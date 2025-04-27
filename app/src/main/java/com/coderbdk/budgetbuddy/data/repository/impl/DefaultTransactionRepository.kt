@@ -63,4 +63,25 @@ class DefaultTransactionRepository @Inject constructor(
             }
         ).flow
     }
+
+    override fun getFilteredTransactionsWithBothCategoriesPaging(transactionFilter: TransactionFilter): Flow<PagingData<TransactionWithBothCategories>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                transactionDao.getFilteredTransactionsWithBothCategoriesPaging(
+                    transactionFilter.query,
+                    transactionFilter.type,
+                    transactionFilter.expenseCategoryId,
+                    transactionFilter.incomeCategoryId,
+                    transactionFilter.period,
+                    transactionFilter.startDate,
+                    transactionFilter.endDate,
+                    transactionFilter.isRecurring
+                )
+            }
+        ).flow
+    }
 }
