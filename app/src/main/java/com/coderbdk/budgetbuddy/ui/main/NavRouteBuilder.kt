@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.coderbdk.budgetbuddy.ui.analysis.AnalyticsScreen
 import com.coderbdk.budgetbuddy.ui.budget.BudgetScreen
 import com.coderbdk.budgetbuddy.ui.category.CategoryManageScreen
 import com.coderbdk.budgetbuddy.ui.home.HomeScreen
@@ -25,7 +26,9 @@ fun NavGraphBuilder.navRouteBuilder(
     composable<Screen.AddTransaction> {
         AddTransactionScreen(navController)
     }
-    composable<Screen.Analytics> { }
+    composable<Screen.Analytics> {
+        AnalyticsScreen(navController)
+    }
     composable<Screen.Settings> {
     }
 

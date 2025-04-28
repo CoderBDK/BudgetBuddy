@@ -2,6 +2,7 @@ package com.coderbdk.budgetbuddy.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -10,19 +11,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -40,11 +47,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
+import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.ui.main.Screen
+import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 import com.coderbdk.budgetbuddy.utils.CategoryColorUtils
 import com.github.mikephil.charting.charts.PieChart
@@ -76,26 +87,37 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         viewModel.initCategory(context)
     }
+    HomeScreen(
+        totalIncome = totalIncome,
+        totalExpense = totalExpense,
+        recentTransactions = recentTransactions,
+        budgets = budgets,
+    ) {
+        navController.navigate(it)
+    }
+}
+
+@Composable
+fun HomeScreen(
+    totalIncome: Double,
+    totalExpense: Double,
+    recentTransactions: List<TransactionWithBothCategories>,
+    budgets: List<BudgetWithCategory>,
+    navigateTo: (Screen) -> Unit
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
         item {
-            TotalBalanceCard(totalIncome, totalExpense)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ExpenseChart(recentTransactions)
-                BudgetProgressSection(budgets)
+            TotalBalanceCard(recentTransactions, totalIncome, totalExpense) {
+               navigateTo(Screen.AddTransaction)
             }
-
+            BudgetProgressSection(budgets)
             Spacer(modifier = Modifier.height(16.dp))
         }
         recentTransactionsSection(recentTransactions, gotoTransactionDetails = {
-            navController.navigate(Screen.Transactions)
+            navigateTo(Screen.Transactions)
         })
     }
 }
@@ -114,9 +136,9 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
             }
     }
     val categoryIntColors = remember {
-       transactions.associate {
-           it.expenseCategory?.name to it.expenseCategory?.colorCode
-       }
+        transactions.associate {
+            it.expenseCategory?.name to it.expenseCategory?.colorCode
+        }
     }
 
     val entries = remember {
@@ -176,7 +198,7 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
             }
         },
         modifier = Modifier
-            .size(178.dp)
+            .size(148.dp)
             .padding(8.dp)
     )
 
@@ -184,13 +206,18 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
 
 
 @Composable
-fun TotalBalanceCard(income: Double, expense: Double) {
+fun TotalBalanceCard(
+    recentTransactions: List<TransactionWithBothCategories>,
+    income: Double,
+    expense: Double,
+    navigateToAddTransaction: () -> Unit
+) {
     ElevatedCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         Row(
             modifier = Modifier
@@ -200,43 +227,71 @@ fun TotalBalanceCard(income: Double, expense: Double) {
             verticalAlignment = Alignment.CenterVertically
 
         ) {
-            Column(
-                Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
+            ExpenseChart(recentTransactions)
+            FilledIconButton(
+                onClick = {
+                    navigateToAddTransaction()
+                }
             ) {
-                Text("Total Income", fontSize = 16.sp, color = Color(0xFF4CAF50))
-                Text("$${income}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.AddCircle, "transaction")
             }
-            Icon(Icons.Default.ElectricBolt, "bolt", tint = Color(0xFFFF9800))
-            Column(
-                Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Total Expense", fontSize = 16.sp, color = Color(0xFFF44336))
-                Text("$${expense}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    Modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Total Income", fontSize = 16.sp, color = Color(0xFF4CAF50))
+                    Text("$${income}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                }
+                Icon(Icons.Default.ElectricBolt, "bolt", tint = Color(0xFFFF9800))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Total Expense", fontSize = 16.sp, color = Color(0xFFF44336))
+                    Text("$${expense}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                }
             }
+
+
         }
     }
 }
 
 @Composable
-private fun RowScope.BudgetProgressSection(
+private fun BudgetProgressSection(
     budgets: List<BudgetWithCategory>
 ) {
     Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .weight(1f)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text("Budget Overview", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-
+        Text("", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.SpaceBetween
+        ) {
+            Text(
+                text = "Budget Overview",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+            )
+            IconButton(
+                onClick = {}
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, "icon")
+            }
+        }
         budgets.take(3).forEach { budgetWithCategory ->
             val budget = budgetWithCategory.budget
             val spentAmount = budget.spentAmount
             val totalBudget = budget.limitAmount
             val progress = (if (totalBudget > 0) spentAmount / totalBudget else 0f).toFloat()
-            Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                Text("${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}", fontSize = 14.sp)
+            Column(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
+                Text(
+                    "${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}",
+                    fontSize = 14.sp
+                )
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
@@ -275,6 +330,51 @@ private fun LazyListScope.recentTransactionsSection(
 
     }
     items(transactions.take(3)) { transaction ->
-        TransactionItem(transaction){}
+        TransactionItem(transaction) {}
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomePreview() {
+    val transactions = listOf(
+        TransactionWithBothCategories(
+            transaction = Transaction(
+                type = TransactionType.EXPENSE,
+                amount = 120.0,
+                transactionDate = 16 * 10000
+            ),
+            incomeCategory = null,
+            expenseCategory = ExpenseCategory(name = "Food")
+        ),
+        TransactionWithBothCategories(
+            transaction = Transaction(
+                type = TransactionType.EXPENSE,
+                amount = 10.0,
+                transactionDate = 16 * 10000
+            ),
+            incomeCategory = null,
+            expenseCategory = ExpenseCategory(name = "Medical")
+        )
+    )
+    BudgetBuddyTheme {
+        HomeScreen(
+            totalIncome = 0.0,
+            totalExpense = 0.0,
+            recentTransactions = transactions,
+            budgets = listOf(
+                BudgetWithCategory(
+                    budget = Budget(
+                        expenseCategoryId = 0,
+                        period = BudgetPeriod.DAILY,
+                        limitAmount = 0.0,
+                        startDate = 0L,
+                        endDate = 0L
+                    ),
+                    expenseCategory = ExpenseCategory(name = "Food")
+                )
+            ),
+            navigateTo = {}
+        )
     }
 }

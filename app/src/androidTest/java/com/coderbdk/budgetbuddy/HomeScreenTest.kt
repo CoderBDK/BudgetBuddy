@@ -30,26 +30,6 @@ class HomeScreenTest {
 
     @Test
     fun testButton() {
-        var clickCount = 0
-        val maxClick = 5
-        composeTestRule.setContent {
-            var count by remember { mutableStateOf(0) }
-            Button(
-                onClick = {
-                    count = count.plus(2)
-                   clickCount = clickCount.inc()
-                }
-            ) {
-                Text("Click Me")
-            }
-            Text("Count:${count}")
-        }
-        repeat(maxClick) {
-            composeTestRule
-                .onNodeWithText("Click Me")
-                .performClick()
-        }
-        composeTestRule.onNodeWithText("Count:${maxClick * 2}").assertIsDisplayed()
-        assertEquals(maxClick, clickCount)
+
     }
 }

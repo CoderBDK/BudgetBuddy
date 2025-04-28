@@ -8,16 +8,28 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.BusinessCenter
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -35,19 +47,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.coderbdk.budgetbuddy.ui.home.HomePreview
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 
 
@@ -62,10 +79,10 @@ fun BudgetBuddyApp() {
 
     val bottomNavItems = remember {
         listOf(
-            BottomNavItem(Screen.Home, "Home", Icons.Default.Home),
-            BottomNavItem(Screen.Budgets, "Budgets", Icons.Default.BusinessCenter),
-            BottomNavItem(Screen.Analytics, "Analytics", Icons.Default.Analytics),
-            BottomNavItem(Screen.Settings, "Settings", Icons.Default.Settings),
+            BottomNavItem(Screen.Home, "Home", Icons.Filled.Home, Icons.Outlined.Home),
+            BottomNavItem(Screen.Budgets, "Budgets", Icons.Filled.BusinessCenter, Icons.Outlined.BusinessCenter),
+            BottomNavItem(Screen.Analytics, "Analytics", Icons.Filled.Analytics, Icons.Outlined.Analytics),
+            BottomNavItem(Screen.Settings, "Settings", Icons.Filled.Settings, Icons.Outlined.Settings),
         )
     }
     val rotation by animateFloatAsState(
@@ -117,7 +134,20 @@ fun BudgetBuddyApp() {
                 )
             },
             bottomBar = {
-                NavigationBar {
+                BudgetBuddyBottomNavigation(
+                    currentDestination,
+                    bottomNavItems,
+                    onNavigate = {
+                        navController.navigate(it.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+                /*NavigationBar {
                     bottomNavItems.forEach { item ->
                         NavigationBarItem(
                             icon = { Icon(item.icon, contentDescription = item.label) },
@@ -134,7 +164,7 @@ fun BudgetBuddyApp() {
                             }
                         )
                     }
-                }
+                }*/
             },
             floatingActionButton = {
                 AnimatedVisibility(
@@ -175,7 +205,7 @@ fun FloatingActionButtonContent(
             }) {
 
                 Icon(
-                    Icons.Default.MonetizationOn,
+                    Icons.Default.AddCircle,
                     contentDescription = "Add Transaction"
                 )
             }
@@ -195,5 +225,71 @@ fun FloatingActionButtonContent(
 private data class BottomNavItem<T : Any>(
     val route: T,
     val label: String,
-    val icon: ImageVector
+    val iconFilled: ImageVector,
+    val iconOutlined: ImageVector
 )
+
+
+@Composable
+private fun BudgetBuddyBottomNavigation(
+    currentDestination: NavDestination?,
+    bottomNavItems: List<BottomNavItem<out Screen>>,
+    onNavigate: (BottomNavItem<out Screen>) -> Unit
+) {
+        NavigationBar(
+            containerColor = Color.Transparent
+        ) {
+            bottomNavItems.forEach { item ->
+                val isSelected =
+                    currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            if(isSelected)item.iconFilled else item.iconOutlined,
+                            contentDescription = item.label,
+                            modifier = Modifier.size(if (isSelected) 24.dp else 22.dp),
+                        )
+                    },
+                    label = { Text(item.label) },
+                    selected = isSelected,
+                    onClick = {
+                        onNavigate(item)
+                    },
+                )
+            }
+        }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AppPreview() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    val bottomNavItems = remember {
+        listOf(
+            BottomNavItem(Screen.Home, "Home", Icons.Filled.Home, Icons.Outlined.Home),
+            BottomNavItem(Screen.Budgets, "Budgets", Icons.Filled.BusinessCenter, Icons.Outlined.BusinessCenter),
+            BottomNavItem(Screen.Analytics, "Analytics", Icons.Filled.Analytics, Icons.Outlined.Analytics),
+            BottomNavItem(Screen.Settings, "Settings", Icons.Filled.Settings, Icons.Outlined.Settings),
+        )
+    }
+    BudgetBuddyTheme {
+
+        Scaffold(
+            bottomBar = {
+                BudgetBuddyBottomNavigation(
+                    currentDestination = currentDestination,
+                    bottomNavItems
+                ) { }
+            }
+        ) { innerPadding ->
+            Box(Modifier.padding(innerPadding)) {
+                HomePreview()
+            }
+        }
+
+    }
+}
+

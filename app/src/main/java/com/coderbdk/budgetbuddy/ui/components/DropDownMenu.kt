@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.model.DefaultExpenseCategory
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
@@ -74,7 +75,7 @@ fun <T> DropDownMenu(
                 )
             },
             supportingContent = {
-                Text(entries[selectedIndex].title)
+                Text(entries[selectedIndex].title, fontSize = 12.sp)
             },
             trailingContent = trailingContent
         )
