@@ -33,7 +33,7 @@ import com.coderbdk.budgetbuddy.data.model.DefaultExpenseCategory
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 
-data class DropDownEntry<T>(
+data class DropDownEntry<out T>(
     val title: String,
     val data: T
 )

@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -64,12 +65,12 @@ fun AddTransactionScreen(
             navController.navigate(Screen.Budgets)
         }
     }
-    if(expenseCategoryList.isEmpty())return
+    if (expenseCategoryList.isEmpty()) return
 
     AddTransactionScreen(
         navController = navController,
-       expenseCategoryList = expenseCategoryList,
-       incomeCategoryList =  incomeCategoryList,
+        expenseCategoryList = expenseCategoryList,
+        incomeCategoryList = incomeCategoryList,
         uiState = uiState,
         uiEvent = TransactionUiEvent(
             onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
@@ -104,27 +105,44 @@ fun AddTransactionScreen(
     var selectedCategoryIndex by remember { mutableIntStateOf(0) }
 
     val expenseCategoryEntries = remember {
-       expenseCategoryList.map {
-            DropDownEntry(
-                title = it.name.lowercase().capitalizeFirstLetter(),
-                data = it
+        buildList {
+            add(DropDownEntry(title = "---", data = null))
+            addAll(
+                expenseCategoryList.map { category ->
+                    DropDownEntry(
+                        title = category.name.lowercase().capitalizeFirstLetter(),
+                        data = category
+                    )
+                }
             )
         }
     }
+
     val incomeCategoryEntries = remember {
-        incomeCategoryList.map {
-            DropDownEntry(
-                title = it.name.lowercase().capitalizeFirstLetter(),
-                data = it
+        buildList {
+            add(DropDownEntry(title = "---", data = null))
+            addAll(
+                incomeCategoryList.map {
+                    DropDownEntry(
+                        title = it.name.lowercase().capitalizeFirstLetter(),
+                        data = it
+                    )
+                }
             )
         }
+
     }
     var selectedPeriodIndex by remember { mutableIntStateOf(0) }
     val periodEntries = remember {
-        BudgetPeriod.entries.map {
-            DropDownEntry(
-                title = it.name.lowercase().capitalizeFirstLetter(),
-                data = it
+        buildList {
+            add(DropDownEntry(title = "---", data = null))
+            addAll(
+                BudgetPeriod.entries.map {
+                    DropDownEntry(
+                        title = it.name.lowercase().capitalizeFirstLetter(),
+                        data = it
+                    )
+                }
             )
         }
     }
@@ -171,7 +189,7 @@ fun AddTransactionScreen(
                 uiEvent.onTypeChange(data)
             }
         )
-        if(uiState.type == TransactionType.EXPENSE) {
+        if (uiState.type == TransactionType.EXPENSE) {
             Spacer(Modifier.padding(8.dp))
 
             DropDownMenu(
@@ -185,7 +203,7 @@ fun AddTransactionScreen(
                             navController.navigate(Screen.CategoryManage(TransactionType.EXPENSE))
                         }
                     ) {
-                        Icon(Icons.Default.Settings,"manage")
+                        Icon(Icons.Default.Settings, "manage")
                     }
                 },
                 onSelected = { data, index ->
@@ -217,7 +235,7 @@ fun AddTransactionScreen(
                             navController.navigate(Screen.CategoryManage(TransactionType.INCOME))
                         }
                     ) {
-                        Icon(Icons.Default.Settings,"manage")
+                        Icon(Icons.Default.Settings, "manage")
                     }
                 },
                 onSelected = { data, index ->
@@ -255,7 +273,7 @@ fun AddTransactionPreview(modifier: Modifier = Modifier) {
             expenseCategoryList = emptyList(),
             incomeCategoryList = emptyList(),
             uiState = TransactionUiState(),
-            uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {},{})
+            uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {}, {})
         )
     }
 }

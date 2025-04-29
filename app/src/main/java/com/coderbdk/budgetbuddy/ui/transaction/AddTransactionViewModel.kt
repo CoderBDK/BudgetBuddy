@@ -37,9 +37,9 @@ data class TransactionUiState(
 
 data class TransactionUiEvent(
     val onAmountChange: (String) -> Unit,
-    val onExpenseCategoryChange: (ExpenseCategory) -> Unit,
-    val onIncomeCategoryChange: (IncomeCategory) -> Unit,
-    val onPeriodChange: (BudgetPeriod) -> Unit,
+    val onExpenseCategoryChange: (ExpenseCategory?) -> Unit,
+    val onIncomeCategoryChange: (IncomeCategory?) -> Unit,
+    val onPeriodChange: (BudgetPeriod?) -> Unit,
     val onTypeChange: (TransactionType) -> Unit,
     val onRecurringChange: (Boolean) -> Unit,
     val onNotesChange: (String) -> Unit,
@@ -110,7 +110,7 @@ class AddTransactionViewModel @Inject constructor(
     }
 
 
-    fun onExpenseCategoryChange(category: ExpenseCategory) {
+    fun onExpenseCategoryChange(category: ExpenseCategory?) {
         _uiState.update {
             it.copy(
                 expenseCategory = category,
@@ -118,7 +118,7 @@ class AddTransactionViewModel @Inject constructor(
             )
         }
     }
-    fun onIncomeCategoryChange(category: IncomeCategory) {
+    fun onIncomeCategoryChange(category: IncomeCategory?) {
         _uiState.update {
             it.copy(
                 incomeCategory = category,
@@ -127,7 +127,7 @@ class AddTransactionViewModel @Inject constructor(
             )
         }
     }
-    fun onPeriodChange(value: BudgetPeriod) {
+    fun onPeriodChange(value: BudgetPeriod?) {
         _uiState.update {
             it.copy(
                 period = value
