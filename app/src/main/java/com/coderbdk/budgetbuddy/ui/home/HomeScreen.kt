@@ -1,5 +1,6 @@
 package com.coderbdk.budgetbuddy.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -182,7 +184,8 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
                 isDrawHoleEnabled = true
                 centerText = "Total\n${categoryTotals.values.sum()}"
                 setCenterTextSizePixels(24f)
-                setHoleColor(Color.White.toArgb())
+                setHoleColor(colorScheme.secondaryContainer.toArgb())
+                setCenterTextColor(colorScheme.onSecondaryContainer.toArgb())
                 animateY(1000)
                 setUsePercentValues(true)
                 legend.apply {
@@ -355,7 +358,9 @@ fun HomePreview() {
             expenseCategory = ExpenseCategory(name = "Medical")
         )
     )
-    BudgetBuddyTheme {
+    BudgetBuddyTheme(
+        darkTheme = true
+    ) {
         HomeScreen(
             totalIncome = 0.0,
             totalExpense = 0.0,
