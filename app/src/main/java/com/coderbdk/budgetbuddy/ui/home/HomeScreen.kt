@@ -2,16 +2,13 @@ package com.coderbdk.budgetbuddy.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -20,15 +17,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +44,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
-import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
@@ -57,7 +52,6 @@ import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
-import com.coderbdk.budgetbuddy.utils.CategoryColorUtils
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.LegendEntry
@@ -111,7 +105,7 @@ fun HomeScreen(
     ) {
         item {
             TotalBalanceCard(recentTransactions, totalIncome, totalExpense) {
-               navigateTo(Screen.AddTransaction)
+                navigateTo(Screen.AddTransaction)
             }
             BudgetProgressSection(budgets)
             Spacer(modifier = Modifier.height(16.dp))
@@ -176,6 +170,7 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
                 )
             }
     }
+    val colorScheme = MaterialTheme.colorScheme
     AndroidView(
         factory = { context ->
             PieChart(context).apply {
@@ -192,7 +187,7 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
                     verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
                     horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
                     orientation = Legend.LegendOrientation.HORIZONTAL
-                    textColor = Color.Black.toArgb()
+                    textColor = colorScheme.onSurface.toArgb()
                     textSize = 8f
                 }
             }

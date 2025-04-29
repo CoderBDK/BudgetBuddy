@@ -8,6 +8,8 @@ import com.coderbdk.budgetbuddy.ui.analytics.AnalyticsScreen
 import com.coderbdk.budgetbuddy.ui.budget.BudgetScreen
 import com.coderbdk.budgetbuddy.ui.category.CategoryManageScreen
 import com.coderbdk.budgetbuddy.ui.home.HomeScreen
+import com.coderbdk.budgetbuddy.ui.settings.SettingsScreen
+import com.coderbdk.budgetbuddy.ui.settings.SettingsViewModel
 import com.coderbdk.budgetbuddy.ui.transaction.AddTransactionScreen
 import com.coderbdk.budgetbuddy.ui.transaction.TransactionDetailsScreen
 import com.coderbdk.budgetbuddy.ui.transaction.TransactionsScreen
@@ -15,7 +17,8 @@ import kotlinx.serialization.json.Json
 
 fun NavGraphBuilder.navRouteBuilder(
     navController: NavHostController,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     composable<Screen.Home> {
         HomeScreen(navController)
@@ -30,6 +33,7 @@ fun NavGraphBuilder.navRouteBuilder(
         AnalyticsScreen(navController)
     }
     composable<Screen.Settings> {
+        SettingsScreen(settingsViewModel)
     }
 
     composable<Screen.Transactions> {

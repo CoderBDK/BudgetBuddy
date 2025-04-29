@@ -65,6 +65,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.coderbdk.budgetbuddy.ui.home.HomePreview
+import com.coderbdk.budgetbuddy.ui.settings.SettingsViewModel
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 
 
@@ -90,6 +91,7 @@ fun BudgetBuddyApp() {
     )
 
     val mainViewModel = hiltViewModel<MainViewModel>()
+    val settingsViewModel = hiltViewModel<SettingsViewModel>()
     val fabVisible by mainViewModel.fabVisible.collectAsState()
 
     val nestedScrollConnection = remember {
@@ -103,7 +105,9 @@ fun BudgetBuddyApp() {
 
     val title = currentDestination?.getNavDestinationTitle("Null")
 
-    BudgetBuddyTheme {
+    BudgetBuddyTheme(
+        darkTheme = settingsViewModel.isDarkTheme
+    ) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -185,7 +189,7 @@ fun BudgetBuddyApp() {
                 enterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
                 exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
                 builder = {
-                    navRouteBuilder(navController, mainViewModel)
+                    navRouteBuilder(navController, mainViewModel, settingsViewModel)
                 }
             )
         }
