@@ -13,7 +13,7 @@ enum class DefaultIncomeCategory(@ColorRes val colorResId: Int, val description:
     FREELANCE(R.color.freelance_color, "Freelancing income"),
     GIFT(R.color.gift_color, "Gift or donation"),
     RENTAL(R.color.rental_color, "Income from rent"),
-    OTHERS(R.color.others_color, "Other sources");
+    OTHERS(R.color.others_income_color, "Other sources");
 
     fun getColor(context: Context): Int {
         return ContextCompat.getColor(context, colorResId)

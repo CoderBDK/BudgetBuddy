@@ -23,6 +23,6 @@
     <color name="freelance_color">#FF9800</color>
     <color name="gift_color">#F44336</color>
     <color name="rental_color">#00BCD4</color>
-    <color name="others_color">#607D8B</color>
+    <color name="others_income_color">#607D8B</color>
 
 </resources>
