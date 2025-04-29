@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.coderbdk.budgetbuddy.ui.analysis.AnalyticsScreen
+import com.coderbdk.budgetbuddy.ui.analytics.AnalyticsScreen
 import com.coderbdk.budgetbuddy.ui.budget.BudgetScreen
 import com.coderbdk.budgetbuddy.ui.category.CategoryManageScreen
 import com.coderbdk.budgetbuddy.ui.home.HomeScreen

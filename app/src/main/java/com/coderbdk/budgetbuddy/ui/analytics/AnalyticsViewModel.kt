@@ -1,8 +1,7 @@
-package com.coderbdk.budgetbuddy.ui.analysis
+package com.coderbdk.budgetbuddy.ui.analytics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.domain.usecase.budget.GetBudgetsWithExpenseCategoryUseCase
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetRecentTransactionsWithBothCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
