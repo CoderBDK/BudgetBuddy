@@ -104,48 +104,56 @@ fun AddTransactionScreen(
     }
     var selectedCategoryIndex by remember { mutableIntStateOf(0) }
 
-    val expenseCategoryEntries = remember {
-        buildList {
-            add(DropDownEntry(title = "---", data = null))
-            addAll(
-                expenseCategoryList.map { category ->
-                    DropDownEntry(
-                        title = category.name.lowercase().capitalizeFirstLetter(),
-                        data = category
-                    )
-                }
-            )
+    val expenseCategoryEntries by remember(expenseCategoryList) {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    expenseCategoryList.map { category ->
+                        DropDownEntry(
+                            title = category.name.lowercase().capitalizeFirstLetter(),
+                            data = category
+                        )
+                    }
+                )
+            }
         }
     }
 
-    val incomeCategoryEntries = remember {
-        buildList {
-            add(DropDownEntry(title = "---", data = null))
-            addAll(
-                incomeCategoryList.map {
-                    DropDownEntry(
-                        title = it.name.lowercase().capitalizeFirstLetter(),
-                        data = it
-                    )
-                }
-            )
+    val incomeCategoryEntries by remember(incomeCategoryList) {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    incomeCategoryList.map {
+                        DropDownEntry(
+                            title = it.name.lowercase().capitalizeFirstLetter(),
+                            data = it
+                        )
+                    }
+                )
+            }
         }
 
     }
+
     var selectedPeriodIndex by remember { mutableIntStateOf(0) }
-    val periodEntries = remember {
-        buildList {
-            add(DropDownEntry(title = "---", data = null))
-            addAll(
-                BudgetPeriod.entries.map {
-                    DropDownEntry(
-                        title = it.name.lowercase().capitalizeFirstLetter(),
-                        data = it
-                    )
-                }
-            )
+    val periodEntries by remember {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    BudgetPeriod.entries.map {
+                        DropDownEntry(
+                            title = it.name.lowercase().capitalizeFirstLetter(),
+                            data = it
+                        )
+                    }
+                )
+            }
         }
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

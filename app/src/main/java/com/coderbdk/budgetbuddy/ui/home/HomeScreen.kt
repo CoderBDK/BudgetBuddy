@@ -293,12 +293,13 @@ private fun BudgetProgressSection(
                     "${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}",
                     fontSize = 14.sp
                 )
+                val color = Color(budgetWithCategory.expenseCategory?.colorCode?:0xFFFFFFF)
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    color = if (progress > 1f) Color.Red.copy(0.6f) else Color.Blue.copy(0.6f)
+                    color = color //if (progress > 1f) Color.Red.copy(0.6f) else Color.Blue.copy(0.6f)
                 )
             }
         }
