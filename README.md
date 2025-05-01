@@ -16,15 +16,18 @@
 ## 📸 Preview
 
 <div align="center">
- <img src="https://github.com/user-attachments/assets/7df3684b-5d28-464d-b125-9a49a6b3197b" alt="Screenshot 1" width="300" />
-  <img src="https://github.com/user-attachments/assets/071ea11f-25d4-4dc8-9233-cb2b6498595f" alt="Screenshot 1" width="300" />
-  <img src="https://github.com/user-attachments/assets/896d5e61-ae46-429e-bf82-3cfbfbe43c7f" alt="Screenshot 3" width="300" />
-    <img src="https://github.com/user-attachments/assets/fe5f2d9c-ccc7-4c5c-a018-da1c4bee3327" alt="Screenshot 2" width="300" />
-  <img src="https://github.com/user-attachments/assets/b489ee37-c5a9-4b6f-a1c9-bb186030edbb" alt="Screenshot 3" width="300" />
-  <img src="https://github.com/user-attachments/assets/5cdf6f78-a23a-4cfc-8c25-b193ba31d49f" alt="Screenshot 3" width="300" />
-
-
+  <img src="https://github.com/user-attachments/assets/576e1fe1-54c7-4773-9a48-a480a80bda26" alt="Screenshot 3" width="300" />
+  <img src="https://github.com/user-attachments/assets/b4edd779-e07e-4b33-9fdf-41b97b21dfd7" alt="Screenshot 2" width="300" />
+  <img src="https://github.com/user-attachments/assets/5d243e3d-df96-4341-8863-ed34af3b3698" alt="Screenshot 3" width="300" />
+  <img src="https://github.com/user-attachments/assets/33d2a619-e16a-4897-9129-1b86cb2fb1ba" alt="Screenshot 1" width="300" />
+  <img src="https://github.com/user-attachments/assets/040bbda8-0c9b-49f5-bb38-91f10e0d2ddc" alt="Screenshot 1" width="300" />
+  <img src="https://github.com/user-attachments/assets/54d44f48-bf64-4606-9a3b-e36235507980" alt="Screenshot 3" width="300" />
+  <img src="https://github.com/user-attachments/assets/9221babc-4860-4330-a0f4-459d400739bd" alt="Screenshot 2" width="300" />
+  <img src="https://github.com/user-attachments/assets/3b5236aa-42a4-46f7-a2a7-bac306f8d934" alt="Screenshot 3" width="300" />
+  <img src="https://github.com/user-attachments/assets/baf81658-15b0-43a2-b36d-51d5d8657ed9" alt="Screenshot 3" width="300" />
+ 
 </div>
+
 ## Requirements
 
 - **Android Studio** with **Kotlin** support
