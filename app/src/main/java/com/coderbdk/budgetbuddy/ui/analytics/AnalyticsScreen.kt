@@ -1,38 +1,65 @@
 package com.coderbdk.budgetbuddy.ui.analytics
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.model.BudgetFilter
+import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
+import com.coderbdk.budgetbuddy.ui.budget.AddBudgetDialog
+import com.coderbdk.budgetbuddy.ui.budget.DatePickerModal
+import com.coderbdk.budgetbuddy.ui.budget.convertMillisToDate
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
+import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -48,33 +75,73 @@ fun AnalyticsScreen(
     navController: NavController,
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
-    val budgets by viewModel.budgetsFlow.collectAsStateWithLifecycle(emptyList())
+    val budgets by viewModel.filteredBudgets.collectAsStateWithLifecycle(emptyList())
     val transactions by viewModel.transactionsFlow.collectAsStateWithLifecycle(emptyList())
-    AnalyticsScreen(budgets = budgets, transactions = transactions)
+    val expenseCategories by viewModel.expenseCategories.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    AnalyticsScreen(
+        uiState = uiState,
+        budgets = budgets,
+        transactions = transactions,
+        expenseCategoryList = expenseCategories,
+        onBudgetFilter = viewModel::onBudgetFilter
+    )
 }
 
 @Composable
 fun AnalyticsScreen(
+    uiState: AnalyticsUiState,
     budgets: List<BudgetWithCategory>,
-    transactions: List<TransactionWithBothCategories>
+    transactions: List<TransactionWithBothCategories>,
+    expenseCategoryList: List<ExpenseCategory>,
+    onBudgetFilter: (BudgetFilter?) -> Unit
 ) {
     val analyticTypes = listOf(
         DropDownEntry("Budget", 0),
         DropDownEntry("Transaction", 1)
     )
     var selectedIndex by remember { mutableIntStateOf(0) }
+    var showFilter by remember { mutableStateOf(false) }
+
+    if (showFilter) {
+        when (selectedIndex) {
+            0 -> {
+                BudgetFilterDialog(
+                    budgetFilter = uiState.budgetFilter,
+                    expenseCategoryList = expenseCategoryList,
+                    onDismiss = {
+                        showFilter = false
+                    },
+                    onSave = {
+                        onBudgetFilter(it)
+                        showFilter = false
+                    },
+                )
+            }
+
+            1 -> {
+
+            }
+        }
+    }
     Column(
-        Modifier.fillMaxSize().padding(8.dp)
+        Modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
+        // Text("${budgets.size},${uiState.budgetFilter}")
         DropDownMenu(
             title = "Choose Analytic Type",
             entries = analyticTypes,
             selectedIndex = selectedIndex,
             trailingContent = {
                 IconButton(
-                    onClick = {}
+                    onClick = {
+                        showFilter = true
+                    }
                 ) {
-                    Icon(Icons.Default.FilterList,"filter")
+                    Icon(Icons.Default.FilterList, "filter")
                 }
             },
             onSelected = { index, data ->
@@ -102,6 +169,7 @@ fun composeColorToAndroidColor(composeColor: Color): Int {
     // Return an Android color using ARGB
     return android.graphics.Color.argb(alpha, red, green, blue)
 }
+
 @Composable
 fun BudgetAnalytics(list: List<BudgetWithCategory>) {
     val colorScheme = MaterialTheme.colorScheme
@@ -223,7 +291,10 @@ fun TransactionAnalytics(list: List<TransactionWithBothCategories>) {
     }
 
     val xLabels = list.map { transaction ->
-        SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(transaction.transaction.transactionDate))
+        SimpleDateFormat(
+            "MMM dd",
+            Locale.getDefault()
+        ).format(Date(transaction.transaction.transactionDate))
     }
 
     ElevatedCard(
@@ -277,13 +348,214 @@ fun TransactionAnalytics(list: List<TransactionWithBothCategories>) {
     }
 }
 
+@Composable
+fun BudgetFilterDialog(
+    budgetFilter: BudgetFilter?,
+    expenseCategoryList: List<ExpenseCategory>,
+    onDismiss: () -> Unit,
+    onSave: (BudgetFilter?) -> Unit,
+) {
 
+    var amount by remember { mutableStateOf(budgetFilter?.query) }
+    var period by remember { mutableStateOf(budgetFilter?.period) }
+
+    var selectedPeriodIndex by remember {
+        mutableIntStateOf(
+            budgetFilter?.period?.let { BudgetPeriod.valueOf(it.name).ordinal + 1 } ?: 0
+        )
+    }
+    var selectedCategoryIndex by remember {
+        mutableIntStateOf(
+            expenseCategoryList.indexOfFirst { it.id == budgetFilter?.expenseCategoryId }
+                .let { if (it == -1) 0 else it + 1 }
+        )
+    }
+
+
+    var selectedStartDate by remember { mutableStateOf(budgetFilter?.startDate) }
+    var selectedEndDate by remember { mutableStateOf(budgetFilter?.endDate) }
+
+    var showModalState by remember { mutableIntStateOf(0) }
+    var isClear by remember { mutableStateOf(false) }
+
+    val expenseCategoryEntries by remember(expenseCategoryList) {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    expenseCategoryList.map { category ->
+                        DropDownEntry(
+                            title = category.name.lowercase().capitalizeFirstLetter(),
+                            data = category
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    val periodEntries by remember {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    BudgetPeriod.entries.map {
+                        DropDownEntry(
+                            title = it.name.lowercase().capitalizeFirstLetter(),
+                            data = it
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    if (showModalState == 1 || showModalState == 2) {
+        DatePickerModal(
+            onDateSelected = {
+                if (showModalState == 1) selectedStartDate = it else selectedEndDate = it
+            },
+            onDismiss = { showModalState = 0 }
+        )
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Filter Budget") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = amount ?: "",
+                    onValueChange = { amount = it },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true,
+                    maxLines = 1
+                )
+                Spacer(Modifier.padding(4.dp))
+                DropDownMenu(
+                    modifier = Modifier,
+                    title = "Choose Budget Category",
+                    entries = expenseCategoryEntries,
+                    selectedIndex = selectedCategoryIndex,
+                    onSelected = { data, index ->
+                        selectedCategoryIndex = index
+                    }
+                )
+                Spacer(Modifier.padding(4.dp))
+                DropDownMenu(
+                    modifier = Modifier,
+                    title = "Choose Budget Period",
+                    entries = periodEntries,
+                    selectedIndex = selectedPeriodIndex,
+                    onSelected = { data, index ->
+                        selectedPeriodIndex = index
+                        period = data
+                    }
+                )
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                ) {
+                    OutlinedTextField(
+                        value = selectedStartDate?.let { convertMillisToDate(it) } ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(Icons.Default.DateRange, contentDescription = "Select date")
+                        },
+                        label = {
+                            Text("From")
+                        },
+                        placeholder = { Text("--/--/----") },
+                        textStyle = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .pointerInput(selectedStartDate) {
+                                awaitEachGesture {
+                                    awaitFirstDown(pass = PointerEventPass.Initial)
+                                    val upEvent =
+                                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                                    if (upEvent != null) {
+                                        showModalState = 1
+                                    }
+                                }
+                            }
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    OutlinedTextField(
+                        value = selectedEndDate?.let { convertMillisToDate(it) } ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(Icons.Default.DateRange, contentDescription = "Select date")
+                        },
+                        label = {
+                            Text("To")
+                        },
+                        placeholder = { Text("--/--/----") },
+                        textStyle = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .pointerInput(selectedEndDate) {
+                                awaitEachGesture {
+                                    awaitFirstDown(pass = PointerEventPass.Initial)
+                                    val upEvent =
+                                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                                    if (upEvent != null) {
+                                        showModalState = 2
+                                    }
+                                }
+                            }
+                    )
+                }
+
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (isClear) {
+                        onSave(null)
+                        return@Button
+                    }
+                    onSave(
+                        BudgetFilter(
+                            amount,
+                            expenseCategoryEntries[selectedCategoryIndex].data?.id,
+                            period,
+                            selectedStartDate,
+                            selectedEndDate
+                        )
+                    )
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                isClear = true
+            }) {
+                Text("Clear Filter")
+            }
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+
+        }
+    )
+}
 
 
 @Preview(showBackground = true)
 @Composable
 fun AnalyticsPreview() {
     BudgetBuddyTheme {
-        AnalyticsScreen(listOf(), listOf())
+        AnalyticsScreen(uiState = AnalyticsUiState(), listOf(), listOf(), listOf(), {})
     }
 }

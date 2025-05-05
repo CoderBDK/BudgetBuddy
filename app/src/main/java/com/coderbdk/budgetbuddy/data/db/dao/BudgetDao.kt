@@ -8,6 +8,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.model.BudgetFilter
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import kotlinx.coroutines.flow.Flow
@@ -41,4 +42,25 @@ interface BudgetDao {
     @Transaction
     @Query("SELECT * FROM budgets")
     fun getBudgetsWithCategory(): Flow<List<BudgetWithCategory>>
+
+    @Transaction
+    @Query(
+        """
+    SELECT * FROM budgets
+    WHERE (:query IS NULL OR limit_amount LIKE '%' || :query || '%')
+    AND (:expenseCategoryId IS NULL OR expense_category_id = :expenseCategoryId)
+    AND (:period IS NULL OR period = :period)
+    AND (:startDate IS NULL OR start_date >= :startDate)
+    AND (:endDate IS NULL OR end_date <= :endDate)
+    """
+    )
+    fun getFilteredBudgetsWithCategory(
+        query: String?,
+        expenseCategoryId: Int?,
+        period: BudgetPeriod?,
+        startDate: Long?,
+        endDate: Long?,
+    ): Flow<List<BudgetWithCategory>>
+
+
 }

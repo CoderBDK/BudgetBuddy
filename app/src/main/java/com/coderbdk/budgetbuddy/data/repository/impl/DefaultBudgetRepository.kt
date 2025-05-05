@@ -2,6 +2,7 @@ package com.coderbdk.budgetbuddy.data.repository.impl
 
 import com.coderbdk.budgetbuddy.data.db.dao.BudgetDao
 import com.coderbdk.budgetbuddy.data.db.entity.Budget
+import com.coderbdk.budgetbuddy.data.model.BudgetFilter
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.repository.BudgetRepository
@@ -54,4 +55,13 @@ class DefaultBudgetRepository @Inject constructor(
         return budgetDao.getBudgetsWithCategory()
     }
 
+    override fun getFilteredBudgetsWithCategory(budgetFilter: BudgetFilter?): Flow<List<BudgetWithCategory>> {
+        return budgetDao.getFilteredBudgetsWithCategory(
+            budgetFilter?.query,
+            budgetFilter?.expenseCategoryId,
+            budgetFilter?.period,
+            budgetFilter?.startDate,
+            budgetFilter?.endDate
+        )
+    }
 }
