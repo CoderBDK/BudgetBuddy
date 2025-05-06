@@ -84,4 +84,17 @@ class DefaultTransactionRepository @Inject constructor(
             }
         ).flow
     }
+
+    override fun getFilteredTransactionsWithBothCategories(transactionFilter: TransactionFilter?): Flow<List<TransactionWithBothCategories>> {
+        return transactionDao.getFilteredTransactionsWithBothCategories(
+            transactionFilter?.query,
+            transactionFilter?.type,
+            transactionFilter?.expenseCategoryId,
+            transactionFilter?.incomeCategoryId,
+            transactionFilter?.period,
+            transactionFilter?.startDate,
+            transactionFilter?.endDate,
+            transactionFilter?.isRecurring
+        )
+    }
 }

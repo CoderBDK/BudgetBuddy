@@ -2,9 +2,8 @@ package com.coderbdk.budgetbuddy.ui.analytics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetFilter
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
@@ -12,6 +11,8 @@ import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.domain.usecase.budget.GetBudgetsWithExpenseCategoryUseCase
 import com.coderbdk.budgetbuddy.domain.usecase.budget.GetFilteredBudgetsWithCategoryUseCase
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetAllExpenseCategoriesUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetAllIncomeCategoriesUseCase
+import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetFilteredTransactionsWithBothCategoriesUseCase
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetRecentTransactionsWithBothCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,12 +33,15 @@ data class AnalyticsUiState(
     val budgetFilter: BudgetFilter? = null,
     val transactionFilter: TransactionFilter? = null
 )
+
 @HiltViewModel
 class AnalyticsViewModel @Inject constructor(
     getBudgetsWithExpenseCategoryUseCase: GetBudgetsWithExpenseCategoryUseCase,
     getTransactionWithBothCategoryUseCase: GetRecentTransactionsWithBothCategoriesUseCase,
     getFilteredBudgetsWithCategoryUseCase: GetFilteredBudgetsWithCategoryUseCase,
+    getFilteredTransactionsWithBothCategoriesUseCase: GetFilteredTransactionsWithBothCategoriesUseCase,
     getAllExpenseCategoriesUseCase: GetAllExpenseCategoriesUseCase,
+    getAllIncomeCategoriesUseCase: GetAllIncomeCategoriesUseCase
 ) : ViewModel() {
 
     val budgetsFlow = getBudgetsWithExpenseCategoryUseCase().stateIn(
@@ -58,6 +62,12 @@ class AnalyticsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    val incomeCategories: StateFlow<List<IncomeCategory>> = getAllIncomeCategoriesUseCase().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
     private val _uiState = MutableStateFlow(AnalyticsUiState())
     val uiState: StateFlow<AnalyticsUiState> = _uiState.asStateFlow()
 
@@ -75,10 +85,29 @@ class AnalyticsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val filteredTransactions: Flow<List<TransactionWithBothCategories>> = uiState
+        .debounce(300)
+        .flatMapLatest {
+            getFilteredTransactionsWithBothCategoriesUseCase(
+                it.transactionFilter
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun onBudgetFilter(budgetFilter: BudgetFilter?) {
         _uiState.update {
             it.copy(budgetFilter = budgetFilter)
+        }
+    }
+
+    fun onTransactionFilter(transactionFilter: TransactionFilter?) {
+        _uiState.update {
+            it.copy(transactionFilter = transactionFilter)
         }
     }
 

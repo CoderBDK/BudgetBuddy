@@ -12,12 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -47,10 +53,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetFilter
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
+import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.ui.budget.AddBudgetDialog
@@ -58,7 +67,10 @@ import com.coderbdk.budgetbuddy.ui.budget.DatePickerModal
 import com.coderbdk.budgetbuddy.ui.budget.convertMillisToDate
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
+import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
+import com.coderbdk.budgetbuddy.ui.transaction.TransactionUiEvent
+import com.coderbdk.budgetbuddy.ui.transaction.TransactionUiState
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
@@ -76,26 +88,34 @@ fun AnalyticsScreen(
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     val budgets by viewModel.filteredBudgets.collectAsStateWithLifecycle(emptyList())
-    val transactions by viewModel.transactionsFlow.collectAsStateWithLifecycle(emptyList())
+    val transactions by viewModel.filteredTransactions.collectAsStateWithLifecycle(emptyList())
     val expenseCategories by viewModel.expenseCategories.collectAsStateWithLifecycle()
+    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     AnalyticsScreen(
+        navController = navController,
         uiState = uiState,
         budgets = budgets,
         transactions = transactions,
         expenseCategoryList = expenseCategories,
-        onBudgetFilter = viewModel::onBudgetFilter
+        incomeCategoryList = incomeCategoryList,
+        onBudgetFilter = viewModel::onBudgetFilter,
+        onTransactionFilter = viewModel::onTransactionFilter
     )
 }
 
 @Composable
 fun AnalyticsScreen(
+    navController: NavController,
     uiState: AnalyticsUiState,
     budgets: List<BudgetWithCategory>,
     transactions: List<TransactionWithBothCategories>,
     expenseCategoryList: List<ExpenseCategory>,
-    onBudgetFilter: (BudgetFilter?) -> Unit
+    incomeCategoryList: List<IncomeCategory>,
+    onBudgetFilter: (BudgetFilter?) -> Unit,
+    onTransactionFilter: (TransactionFilter?) -> Unit
 ) {
     val analyticTypes = listOf(
         DropDownEntry("Budget", 0),
@@ -121,7 +141,19 @@ fun AnalyticsScreen(
             }
 
             1 -> {
-
+                TransactionFilterDialog(
+                    navController = navController,
+                    transactionFilter = uiState.transactionFilter,
+                    expenseCategoryList = expenseCategoryList,
+                    incomeCategoryList = incomeCategoryList,
+                    onDismiss = {
+                        showFilter = false
+                    },
+                    onSave = {
+                        onTransactionFilter(it)
+                        showFilter = false
+                    },
+                )
             }
         }
     }
@@ -551,11 +583,332 @@ fun BudgetFilterDialog(
     )
 }
 
+@Composable
+fun TransactionFilterDialog(
+    navController: NavController,
+    transactionFilter: TransactionFilter?,
+    expenseCategoryList: List<ExpenseCategory>,
+    incomeCategoryList: List<IncomeCategory>,
+    onDismiss: () -> Unit,
+    onSave: (TransactionFilter?) -> Unit
+
+) {
+    var amount by remember { mutableStateOf(transactionFilter?.query) }
+    var period by remember { mutableStateOf(transactionFilter?.period) }
+    var isRecurring by remember { mutableStateOf(transactionFilter?.isRecurring) }
+    var selectedTypeIndex by remember {
+        mutableIntStateOf(transactionFilter?.type?.let {
+            TransactionType.valueOf(
+                it.name
+            ).ordinal
+        } ?: 0)
+    }
+
+    val typeEntries = remember {
+        TransactionType.entries.map {
+            DropDownEntry(
+                title = it.name.lowercase().capitalizeFirstLetter(),
+                data = it
+            )
+        }
+    }
+    var selectedExpenseCategoryIndex by remember {
+        mutableIntStateOf(
+            expenseCategoryList.indexOfFirst { it.id == transactionFilter?.expenseCategoryId }
+                .let { if (it == -1) 0 else it + 1 }
+        )
+    }
+    var selectedIncomeCategoryIndex by remember {
+        mutableIntStateOf(
+            incomeCategoryList.indexOfFirst { it.id == transactionFilter?.incomeCategoryId }
+                .let { if (it == -1) 0 else it + 1 }
+        )
+    }
+    val expenseCategoryEntries by remember(expenseCategoryList) {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    expenseCategoryList.map { category ->
+                        DropDownEntry(
+                            title = category.name.lowercase().capitalizeFirstLetter(),
+                            data = category
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    val incomeCategoryEntries by remember(incomeCategoryList) {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    incomeCategoryList.map {
+                        DropDownEntry(
+                            title = it.name.lowercase().capitalizeFirstLetter(),
+                            data = it
+                        )
+                    }
+                )
+            }
+        }
+
+    }
+
+    var selectedPeriodIndex by remember {
+        mutableIntStateOf(
+            transactionFilter?.period?.let { BudgetPeriod.valueOf(it.name).ordinal + 1 } ?: 0
+        )
+    }
+    val periodEntries by remember {
+        derivedStateOf {
+            buildList {
+                add(DropDownEntry(title = "---", data = null))
+                addAll(
+                    BudgetPeriod.entries.map {
+                        DropDownEntry(
+                            title = it.name.lowercase().capitalizeFirstLetter(),
+                            data = it
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    var selectedStartDate by remember { mutableStateOf(transactionFilter?.startDate) }
+    var selectedEndDate by remember { mutableStateOf(transactionFilter?.endDate) }
+
+    var showModalState by remember { mutableIntStateOf(0) }
+    var isClear by remember { mutableStateOf(false) }
+
+    if (showModalState == 1 || showModalState == 2) {
+        DatePickerModal(
+            onDateSelected = {
+                if (showModalState == 1) selectedStartDate = it else selectedEndDate = it
+            },
+            onDismiss = { showModalState = 0 }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Filter Transaction") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(Modifier.padding(8.dp))
+                OutlinedTextField(
+                    value = amount ?: "",
+                    onValueChange = { amount = it },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true,
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(Modifier.padding(8.dp))
+                DropDownMenu(
+                    modifier = Modifier,
+                    title = "Transaction Type",
+                    entries = typeEntries,
+                    selectedIndex = selectedTypeIndex,
+                    onSelected = { data, index ->
+                        selectedTypeIndex = index
+                    }
+                )
+                if (typeEntries[selectedTypeIndex].data == TransactionType.EXPENSE) {
+                    Spacer(Modifier.padding(8.dp))
+
+                    DropDownMenu(
+                        modifier = Modifier,
+                        title = "Transaction Category",
+                        entries = expenseCategoryEntries,
+                        selectedIndex = selectedExpenseCategoryIndex,
+                        trailingContent = {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(Screen.CategoryManage(TransactionType.EXPENSE))
+                                }
+                            ) {
+                                Icon(Icons.Default.Settings, "manage")
+                            }
+                        },
+                        onSelected = { data, index ->
+                            selectedExpenseCategoryIndex = index
+                        }
+                    )
+                    Spacer(Modifier.padding(8.dp))
+                    DropDownMenu(
+                        modifier = Modifier,
+                        title = "Transaction Period",
+                        entries = periodEntries,
+                        selectedIndex = selectedPeriodIndex,
+                        onSelected = { data, index ->
+                            selectedPeriodIndex = index
+                            period = data
+                        }
+                    )
+                } else {
+                    Spacer(Modifier.padding(8.dp))
+                    DropDownMenu(
+                        modifier = Modifier,
+                        title = "Transaction Category",
+                        entries = incomeCategoryEntries,
+                        selectedIndex = selectedIncomeCategoryIndex,
+                        trailingContent = {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(Screen.CategoryManage(TransactionType.INCOME))
+                                }
+                            ) {
+                                Icon(Icons.Default.Settings, "manage")
+                            }
+                        },
+                        onSelected = { data, index ->
+                            selectedIncomeCategoryIndex = index
+                        }
+                    )
+                }
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                ) {
+                    OutlinedTextField(
+                        value = selectedStartDate?.let { convertMillisToDate(it) } ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(Icons.Default.DateRange, contentDescription = "Select date")
+                        },
+                        label = {
+                            Text("From")
+                        },
+                        placeholder = { Text("--/--/----") },
+                        textStyle = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .pointerInput(selectedStartDate) {
+                                awaitEachGesture {
+                                    awaitFirstDown(pass = PointerEventPass.Initial)
+                                    val upEvent =
+                                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                                    if (upEvent != null) {
+                                        showModalState = 1
+                                    }
+                                }
+                            }
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    OutlinedTextField(
+                        value = selectedEndDate?.let { convertMillisToDate(it) } ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = {
+                            Icon(Icons.Default.DateRange, contentDescription = "Select date")
+                        },
+                        label = {
+                            Text("To")
+                        },
+                        placeholder = { Text("--/--/----") },
+                        textStyle = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .pointerInput(selectedEndDate) {
+                                awaitEachGesture {
+                                    awaitFirstDown(pass = PointerEventPass.Initial)
+                                    val upEvent =
+                                        waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                                    if (upEvent != null) {
+                                        showModalState = 2
+                                    }
+                                }
+                            }
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = isRecurring ?: false,
+                        onCheckedChange = { isRecurring = it }
+                    )
+                    Text(text = "Is Recurring")
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (isClear) {
+                        onSave(null)
+                        return@Button
+                    }
+                    onSave(
+                        if (typeEntries[selectedTypeIndex].data == TransactionType.INCOME) {
+                            TransactionFilter(
+                                amount,
+                                typeEntries[selectedTypeIndex].data,
+                                null,
+                                incomeCategoryEntries[selectedIncomeCategoryIndex].data?.id,
+                                null,
+                                selectedStartDate,
+                                selectedEndDate,
+                                isRecurring
+                            )
+                        } else {
+                            TransactionFilter(
+                                amount,
+                                typeEntries[selectedTypeIndex].data,
+                                null,
+                                expenseCategoryEntries[selectedExpenseCategoryIndex].data?.id,
+                                period,
+                                selectedStartDate,
+                                selectedEndDate,
+                                isRecurring
+                            )
+                        }
+
+                    )
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                isClear = true
+            }) {
+                Text("Clear Filter")
+            }
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+
+        }
+    )
+}
 
 @Preview(showBackground = true)
 @Composable
 fun AnalyticsPreview() {
     BudgetBuddyTheme {
-        AnalyticsScreen(uiState = AnalyticsUiState(), listOf(), listOf(), listOf(), {})
+        AnalyticsScreen(
+            navController = rememberNavController(),
+            uiState = AnalyticsUiState(),
+            listOf(),
+            listOf(),
+            listOf(),
+            listOf(),
+            {}, {})
     }
 }

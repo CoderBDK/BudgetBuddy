@@ -127,4 +127,44 @@ interface TransactionDao {
         endDate: Long?,
         isRecurring: Boolean?
     ): PagingSource<Int, Transaction>
+
+
+    @Query("""
+        SELECT
+            t.*,
+            ec.id AS expenseCategory_id,
+            ec.name AS expenseCategory_name,
+            ec.description AS expenseCategory_description,
+            ec.color_code AS expenseCategory_color_code,
+            ec.isDefault AS expenseCategory_isDefault,
+            ic.id AS incomeCategory_id,
+            ic.name AS incomeCategory_name,
+            ic.description AS incomeCategory_description,
+            ic.color_code AS incomeCategory_color_code,
+            ic.isDefault AS incomeCategory_isDefault
+        FROM transactions t
+        LEFT JOIN expense_categories ec ON t.expense_category_id = ec.id
+        LEFT JOIN income_categories ic ON t.income_category_id = ic.id
+
+        WHERE (:query IS NULL OR amount LIKE '%' || :query || '%') 
+        AND (:type IS NULL OR type = :type) 
+        AND (:expenseCategoryId IS NULL OR expense_category_id = :expenseCategoryId)
+        AND (:incomeCategoryId IS NULL OR income_category_id = :incomeCategoryId)
+        AND (:period IS NULL OR period = :period)
+        AND (:startDate IS NULL OR transaction_date >= :startDate)
+        AND (:endDate IS NULL OR transaction_date <= :endDate)
+        AND (:isRecurring IS NULL OR is_recurring = :isRecurring)
+        ORDER BY t.transaction_date DESC
+    """)
+    fun getFilteredTransactionsWithBothCategories(
+        query: String?,
+        type: TransactionType?,
+        expenseCategoryId: Int?,
+        incomeCategoryId: Int?,
+        period: BudgetPeriod?,
+        startDate: Long?,
+        endDate: Long?,
+        isRecurring: Boolean?
+    ): Flow<List<TransactionWithBothCategories>>
+
 }
