@@ -102,8 +102,8 @@ fun AddTransactionScreen(
             )
         }
     }
-    var selectedCategoryIndex by remember { mutableIntStateOf(0) }
-
+    var selectedExpenseCategoryIndex by remember { mutableIntStateOf(0) }
+    var selectedIncomeCategoryIndex by remember { mutableIntStateOf(0) }
     val expenseCategoryEntries by remember(expenseCategoryList) {
         derivedStateOf {
             buildList {
@@ -204,7 +204,7 @@ fun AddTransactionScreen(
                 modifier = Modifier,
                 title = "Transaction Category",
                 entries = expenseCategoryEntries,
-                selectedIndex = selectedCategoryIndex,
+                selectedIndex = selectedExpenseCategoryIndex,
                 trailingContent = {
                     IconButton(
                         onClick = {
@@ -215,7 +215,7 @@ fun AddTransactionScreen(
                     }
                 },
                 onSelected = { data, index ->
-                    selectedCategoryIndex = index
+                    selectedExpenseCategoryIndex = index
                     uiEvent.onExpenseCategoryChange(data)
                 }
             )
@@ -234,9 +234,9 @@ fun AddTransactionScreen(
             Spacer(Modifier.padding(8.dp))
             DropDownMenu(
                 modifier = Modifier,
-                title = "Choose Transaction Category",
+                title = "Transaction Category",
                 entries = incomeCategoryEntries,
-                selectedIndex = selectedCategoryIndex,
+                selectedIndex = selectedIncomeCategoryIndex,
                 trailingContent = {
                     IconButton(
                         onClick = {
@@ -247,7 +247,7 @@ fun AddTransactionScreen(
                     }
                 },
                 onSelected = { data, index ->
-                    selectedCategoryIndex = index
+                    selectedIncomeCategoryIndex = index
                     uiEvent.onIncomeCategoryChange(data)
                 }
             )
