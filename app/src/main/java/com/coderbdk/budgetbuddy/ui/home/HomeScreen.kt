@@ -112,7 +112,9 @@ fun HomeScreen(
             TotalBalanceCard(recentTransactions, totalIncome, totalExpense) {
                 navigateTo(Screen.AddTransaction)
             }
-            BudgetProgressSection(budgets)
+            BudgetProgressSection(budgets) {
+                navigateTo(Screen.Budgets)
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
         recentTransactionsSection(recentTransactions, gotoTransactionDetails = {
@@ -260,7 +262,8 @@ fun TotalBalanceCard(
 
 @Composable
 private fun BudgetProgressSection(
-    budgets: List<BudgetWithCategory>
+    budgets: List<BudgetWithCategory>,
+    navigateTo: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -278,7 +281,7 @@ private fun BudgetProgressSection(
                 modifier = Modifier.padding(16.dp)
             )
             IconButton(
-                onClick = {}
+                onClick = navigateTo
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, "icon")
             }

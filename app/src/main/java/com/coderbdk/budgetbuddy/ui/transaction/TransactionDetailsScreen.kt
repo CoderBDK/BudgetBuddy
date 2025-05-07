@@ -46,6 +46,7 @@ import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionType
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
 import com.coderbdk.budgetbuddy.ui.home.dateFormatter
@@ -57,7 +58,7 @@ import java.util.Date
 @Composable
 fun TransactionDetailsScreen(
     navController: NavController,
-    transaction: Transaction,
+    transaction: TransactionWithBothCategories,
     viewModel: TransactionDetailsViewModel = hiltViewModel()
 ) {
     val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
@@ -69,7 +70,7 @@ fun TransactionDetailsScreen(
         TransactionDetailsContent(
             expenseCategoryList,
             incomeCategoryList,
-            transaction
+            transaction.transaction
         )
     }
 }
