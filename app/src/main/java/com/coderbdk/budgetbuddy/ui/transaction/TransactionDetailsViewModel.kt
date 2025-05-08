@@ -18,11 +18,12 @@ class TransactionDetailsViewModel @Inject constructor(
     getAllIncomeCategoriesUseCase: GetAllIncomeCategoriesUseCase
 ) : ViewModel() {
 
-    val expenseCategories: StateFlow<List<ExpenseCategory>> = getAllExpenseCategoriesUseCase().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val expenseCategories: StateFlow<List<ExpenseCategory>> =
+        getAllExpenseCategoriesUseCase().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     val incomeCategories: StateFlow<List<IncomeCategory>> = getAllIncomeCategoriesUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -6,7 +6,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
-import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.domain.usecase.transaction.GetAllExpenseCategoriesUseCase
@@ -28,10 +27,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TransactionsViewModel @Inject constructor(
-    getSearchWithFilteredTransactionsUseCase: GetSearchWithFilteredTransactionsUseCase,
     getAllExpenseCategoriesUseCase: GetAllExpenseCategoriesUseCase,
     getAllIncomeCategoriesUseCase: GetAllIncomeCategoriesUseCase,
-    getSearchWithFilteredTransactionsBothCategoriesUseCase:GetSearchWithFilteredTransactionsBothCategoriesUseCase
+    getSearchWithFilteredTransactionsBothCategoriesUseCase: GetSearchWithFilteredTransactionsBothCategoriesUseCase
 ) : ViewModel() {
     private val _filter = MutableStateFlow(TransactionFilter())
     val filter: StateFlow<TransactionFilter> = _filter.asStateFlow()
@@ -53,11 +51,12 @@ class TransactionsViewModel @Inject constructor(
         }
         .cachedIn(viewModelScope)
 
-    val expenseCategories: StateFlow<List<ExpenseCategory>> = getAllExpenseCategoriesUseCase().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val expenseCategories: StateFlow<List<ExpenseCategory>> =
+        getAllExpenseCategoriesUseCase().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     val incomeCategories: StateFlow<List<IncomeCategory>> = getAllIncomeCategoriesUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

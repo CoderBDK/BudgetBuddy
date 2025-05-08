@@ -57,11 +57,12 @@ class AddTransactionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TransactionUiState())
     val uiState: StateFlow<TransactionUiState> = _uiState.asStateFlow()
 
-    val expenseCategories: StateFlow<List<ExpenseCategory>> = getAllExpenseCategoriesUseCase().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val expenseCategories: StateFlow<List<ExpenseCategory>> =
+        getAllExpenseCategoriesUseCase().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     val incomeCategories: StateFlow<List<IncomeCategory>> = getAllIncomeCategoriesUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -85,16 +86,16 @@ class AddTransactionViewModel @Inject constructor(
                 )
             }
 
-          /*  if (transaction.type == TransactionType.EXPENSE) {
-                if (!doesBudgetExistUseCase(
-                        transaction.expenseCategoryId!!,
-                        transaction.period!!
-                    )
-                ) {
-                    _uiState.update { it.copy(isBudgetCreationRequired = true) }
-                    return@launch
-                }
-            }*/
+            /*  if (transaction.type == TransactionType.EXPENSE) {
+                  if (!doesBudgetExistUseCase(
+                          transaction.expenseCategoryId!!,
+                          transaction.period!!
+                      )
+                  ) {
+                      _uiState.update { it.copy(isBudgetCreationRequired = true) }
+                      return@launch
+                  }
+              }*/
 
             _uiState.update { it.copy(isSaving = true) }
             insertTransactionWithBudgetIncrementUseCase(transaction)
@@ -118,6 +119,7 @@ class AddTransactionViewModel @Inject constructor(
             )
         }
     }
+
     fun onIncomeCategoryChange(category: IncomeCategory?) {
         _uiState.update {
             it.copy(
@@ -127,6 +129,7 @@ class AddTransactionViewModel @Inject constructor(
             )
         }
     }
+
     fun onPeriodChange(value: BudgetPeriod?) {
         _uiState.update {
             it.copy(

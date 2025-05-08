@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
@@ -24,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -134,7 +134,9 @@ fun TransactionsScreen(
 @Composable
 fun ErrorMessage(message: String, onRetry: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = message, color = Color.Red, fontWeight = FontWeight.Bold)
@@ -175,12 +177,19 @@ fun SearchAndFilterBar(
                 onOptionSelected = { onFilterChange(filter.copy(type = it)) }
             )
 
-            if(filter.type == TransactionType.EXPENSE) {
+            if (filter.type == TransactionType.EXPENSE) {
                 FilterDropdown(
                     label = "Category",
                     options = expenseCategoryList,
                     selectedOption = expenseCategoryList.find { it.id == filter.expenseCategoryId },
-                    onOptionSelected = { onFilterChange(filter.copy(expenseCategoryId = it?.id, incomeCategoryId = null)) },
+                    onOptionSelected = {
+                        onFilterChange(
+                            filter.copy(
+                                expenseCategoryId = it?.id,
+                                incomeCategoryId = null
+                            )
+                        )
+                    },
                     selectedContent = {
                         if (it != null) {
                             Text(text = it.name)
@@ -195,12 +204,19 @@ fun SearchAndFilterBar(
                     }
                 )
 
-            }else {
+            } else {
                 FilterDropdown(
                     label = "Category",
                     options = incomeCategoryList,
                     selectedOption = incomeCategoryList.find { it.id == filter.incomeCategoryId },
-                    onOptionSelected = { onFilterChange(filter.copy(incomeCategoryId = it?.id, expenseCategoryId = null)) },
+                    onOptionSelected = {
+                        onFilterChange(
+                            filter.copy(
+                                incomeCategoryId = it?.id,
+                                expenseCategoryId = null
+                            )
+                        )
+                    },
                     selectedContent = {
                         if (it != null) {
                             Text(text = it.name)
@@ -295,7 +311,7 @@ fun <T> FilterDropdown(
                 expanded = false
             })
             options.forEach { option ->
-                DropdownMenuItem(text = { itemContent(option)}, onClick = {
+                DropdownMenuItem(text = { itemContent(option) }, onClick = {
                     onOptionSelected(option)
                     expanded = false
                 })
