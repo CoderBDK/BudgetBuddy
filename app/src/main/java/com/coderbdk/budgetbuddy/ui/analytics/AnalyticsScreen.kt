@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -62,15 +61,12 @@ import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
-import com.coderbdk.budgetbuddy.ui.budget.AddBudgetDialog
 import com.coderbdk.budgetbuddy.ui.budget.DatePickerModal
 import com.coderbdk.budgetbuddy.ui.budget.convertMillisToDate
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
-import com.coderbdk.budgetbuddy.ui.main.Screen
+import com.coderbdk.budgetbuddy.ui.navigation.Screen
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
-import com.coderbdk.budgetbuddy.ui.transaction.TransactionUiEvent
-import com.coderbdk.budgetbuddy.ui.transaction.TransactionUiState
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
@@ -82,40 +78,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@Composable
-fun AnalyticsScreen(
-    navController: NavController,
-    viewModel: AnalyticsViewModel = hiltViewModel()
-) {
-    val budgets by viewModel.filteredBudgets.collectAsStateWithLifecycle(emptyList())
-    val transactions by viewModel.filteredTransactions.collectAsStateWithLifecycle(emptyList())
-    val expenseCategories by viewModel.expenseCategories.collectAsStateWithLifecycle()
-    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
-
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    AnalyticsScreen(
-        navController = navController,
-        uiState = uiState,
-        budgets = budgets,
-        transactions = transactions,
-        expenseCategoryList = expenseCategories,
-        incomeCategoryList = incomeCategoryList,
-        onBudgetFilter = viewModel::onBudgetFilter,
-        onTransactionFilter = viewModel::onTransactionFilter
-    )
-}
 
 @Composable
 fun AnalyticsScreen(
-    navController: NavController,
     uiState: AnalyticsUiState,
     budgets: List<BudgetWithCategory>,
     transactions: List<TransactionWithBothCategories>,
     expenseCategoryList: List<ExpenseCategory>,
     incomeCategoryList: List<IncomeCategory>,
     onBudgetFilter: (BudgetFilter?) -> Unit,
-    onTransactionFilter: (TransactionFilter?) -> Unit
+    onTransactionFilter: (TransactionFilter?) -> Unit,
+    onNavigateToCategoryManage: (TransactionType) -> Unit
 ) {
     val analyticTypes = listOf(
         DropDownEntry("Budget", 0),
@@ -142,7 +115,6 @@ fun AnalyticsScreen(
 
             1 -> {
                 TransactionFilterDialog(
-                    navController = navController,
                     transactionFilter = uiState.transactionFilter,
                     expenseCategoryList = expenseCategoryList,
                     incomeCategoryList = incomeCategoryList,
@@ -153,6 +125,7 @@ fun AnalyticsScreen(
                         onTransactionFilter(it)
                         showFilter = false
                     },
+                    onNavigateToCategoryManage = onNavigateToCategoryManage
                 )
             }
         }
@@ -585,12 +558,12 @@ fun BudgetFilterDialog(
 
 @Composable
 fun TransactionFilterDialog(
-    navController: NavController,
     transactionFilter: TransactionFilter?,
     expenseCategoryList: List<ExpenseCategory>,
     incomeCategoryList: List<IncomeCategory>,
     onDismiss: () -> Unit,
-    onSave: (TransactionFilter?) -> Unit
+    onSave: (TransactionFilter?) -> Unit,
+    onNavigateToCategoryManage: (TransactionType) -> Unit
 
 ) {
     var amount by remember { mutableStateOf(transactionFilter?.query) }
@@ -737,7 +710,7 @@ fun TransactionFilterDialog(
                         trailingContent = {
                             IconButton(
                                 onClick = {
-                                    navController.navigate(Screen.CategoryManage(TransactionType.EXPENSE))
+                                    onNavigateToCategoryManage(TransactionType.EXPENSE)
                                 }
                             ) {
                                 Icon(Icons.Default.Settings, "manage")
@@ -768,7 +741,7 @@ fun TransactionFilterDialog(
                         trailingContent = {
                             IconButton(
                                 onClick = {
-                                    navController.navigate(Screen.CategoryManage(TransactionType.INCOME))
+                                    onNavigateToCategoryManage(TransactionType.INCOME)
                                 }
                             ) {
                                 Icon(Icons.Default.Settings, "manage")
@@ -903,12 +876,11 @@ fun TransactionFilterDialog(
 fun AnalyticsPreview() {
     BudgetBuddyTheme {
         AnalyticsScreen(
-            navController = rememberNavController(),
             uiState = AnalyticsUiState(),
             listOf(),
             listOf(),
             listOf(),
             listOf(),
-            {}, {})
+            {}, {},{})
     }
 }

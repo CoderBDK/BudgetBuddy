@@ -52,15 +52,19 @@ import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 
+
 @Composable
 fun CategoryManageScreen(
-    navController: NavController,
     type: TransactionType,
-    viewModel: CategoryManageViewModel = hiltViewModel(),
+    expenseCategoryList: List<ExpenseCategory>,
+    incomeCategoryList: List<IncomeCategory>,
+    uiState: CategoryManageUiState,
+    insertExpenseCategory: (ExpenseCategory) -> Unit,
+    insertIncomeCategory: (IncomeCategory) -> Unit,
+    deleteExpenseCategoryById: (Int) -> Unit,
+    showCreateCategoryDialog: () -> Unit,
+    hideCreateCategoryDialog: () -> Unit
 ) {
-    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
-    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var selectedTypeIndex by remember { mutableIntStateOf(TransactionType.valueOf(type.name).ordinal) }
     val typeEntries = remember {
@@ -78,17 +82,15 @@ fun CategoryManageScreen(
             onSave = { name, description, colorCode ->
                 when (typeEntries[selectedTypeIndex].data) {
                     TransactionType.EXPENSE -> {
-                        viewModel.insertExpenseCategory(
-                            ExpenseCategory(
-                                name = name,
-                                description = description,
-                                colorCode = colorCode
-                            )
-                        )
+                       insertExpenseCategory(ExpenseCategory(
+                           name = name,
+                           description = description,
+                           colorCode = colorCode
+                       ))
                     }
 
                     TransactionType.INCOME -> {
-                        viewModel.insertIncomeCategory(
+                        insertIncomeCategory(
                             IncomeCategory(
                                 name = name,
                                 description = description,
@@ -99,7 +101,7 @@ fun CategoryManageScreen(
                 }
             }
         ) {
-           viewModel.hideCreateCategoryDialog()
+          hideCreateCategoryDialog()
         }
     }
 
@@ -115,9 +117,8 @@ fun CategoryManageScreen(
             selectedIndex = selectedTypeIndex,
             trailingContent = {
                 IconButton(
-                    onClick = {
-                        viewModel.showCreateCategoryDialog()
-                    }
+                    onClick = showCreateCategoryDialog
+
                 ) {
                     Icon(Icons.Default.Add, "add")
                 }
@@ -131,7 +132,7 @@ fun CategoryManageScreen(
             TransactionType.EXPENSE -> {
                 ExpenseCategoryList(
                     expenseCategoryList,
-                    onDelete = viewModel::deleteExpenseCategoryById
+                    onDelete = deleteExpenseCategoryById
                 )
             }
 

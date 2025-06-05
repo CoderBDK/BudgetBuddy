@@ -1,6 +1,5 @@
 package com.coderbdk.budgetbuddy.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,16 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -54,7 +49,7 @@ import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
-import com.coderbdk.budgetbuddy.ui.main.Screen
+import com.coderbdk.budgetbuddy.ui.navigation.Screen
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 import com.github.mikephil.charting.charts.PieChart
@@ -72,54 +67,30 @@ val dateFormatter by lazy {
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
-) {
-    // val expenses by viewModel.expensesFlow.collectAsStateWithLifecycle(emptyList())
-    // val incomes by viewModel.incomesFlow.collectAsStateWithLifecycle(emptyList())
-    val budgets by viewModel.budgetsFlow.collectAsStateWithLifecycle(emptyList())
-    val recentTransactions by viewModel.recentTransactionsFlow.collectAsStateWithLifecycle(emptyList())
-    val totalExpense by viewModel.totalExpense.collectAsStateWithLifecycle(0.0)
-    val totalIncome by viewModel.totalIncome.collectAsStateWithLifecycle(0.0)
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        viewModel.initCategory(context)
-    }
-    HomeScreen(
-        totalIncome = totalIncome,
-        totalExpense = totalExpense,
-        recentTransactions = recentTransactions,
-        budgets = budgets,
-    ) {
-        navController.navigate(it)
-    }
-}
-
-@Composable
-fun HomeScreen(
     totalIncome: Double,
     totalExpense: Double,
     recentTransactions: List<TransactionWithBothCategories>,
     budgets: List<BudgetWithCategory>,
-    navigateTo: (Screen) -> Unit
+    onNavigateToAddTransaction: () -> Unit,
+    onNavigateToBudgets: () -> Unit,
+    onNavigateToTransactions: () -> Unit,
+
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
         item {
-            TotalBalanceCard(recentTransactions, totalIncome, totalExpense) {
-                navigateTo(Screen.AddTransaction)
-            }
-            BudgetProgressSection(budgets) {
-                navigateTo(Screen.Budgets)
-            }
+            TotalBalanceCard(
+                recentTransactions,
+                totalIncome,
+                totalExpense,
+                onNavigateToAddTransaction
+            )
+            BudgetProgressSection(budgets, onNavigateToBudgets)
             Spacer(modifier = Modifier.height(16.dp))
         }
-        recentTransactionsSection(recentTransactions, gotoTransactionDetails = {
-            navigateTo(Screen.Transactions)
-        })
+        recentTransactionsSection(recentTransactions, onNavigateToTransactions)
     }
 }
 
@@ -296,7 +267,7 @@ private fun BudgetProgressSection(
                     "${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}",
                     fontSize = 14.sp
                 )
-                val color = Color(budgetWithCategory.expenseCategory?.colorCode?:0xFFFFFFF)
+                val color = Color(budgetWithCategory.expenseCategory?.colorCode ?: 0xFFFFFFF)
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
@@ -312,7 +283,7 @@ private fun BudgetProgressSection(
 
 private fun LazyListScope.recentTransactionsSection(
     transactions: List<TransactionWithBothCategories>,
-    gotoTransactionDetails: () -> Unit
+    gotoTransactions: () -> Unit
 ) {
     item {
         Row(
@@ -327,7 +298,7 @@ private fun LazyListScope.recentTransactionsSection(
                 modifier = Modifier.padding(16.dp)
             )
             IconButton(
-                onClick = gotoTransactionDetails
+                onClick = gotoTransactions
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, "icon")
             }
@@ -381,7 +352,9 @@ fun HomePreview() {
                     expenseCategory = ExpenseCategory(name = "Food")
                 )
             ),
-            navigateTo = {}
+            onNavigateToAddTransaction = {},
+            onNavigateToBudgets = {},
+            onNavigateToTransactions = {}
         )
     }
 }

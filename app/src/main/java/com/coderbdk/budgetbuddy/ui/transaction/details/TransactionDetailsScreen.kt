@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.ui.transaction
+package com.coderbdk.budgetbuddy.ui.transaction.details
 
 
 import androidx.compose.foundation.background
@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.db.entity.Transaction
@@ -43,28 +42,12 @@ import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
 import com.coderbdk.budgetbuddy.ui.home.dateFormatter
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
+import com.coderbdk.budgetbuddy.ui.transaction.add.TransactionUiEvent
+import com.coderbdk.budgetbuddy.ui.transaction.add.TransactionUiState
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 import java.util.Date
 
-@Composable
-fun TransactionDetailsScreen(
-    navController: NavController,
-    transaction: TransactionWithBothCategories,
-    viewModel: TransactionDetailsViewModel = hiltViewModel()
-) {
-    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
-    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
 
-    Column(
-        Modifier.fillMaxSize()
-    ) {
-        TransactionDetailsContent(
-            expenseCategoryList,
-            incomeCategoryList,
-            transaction.transaction
-        )
-    }
-}
 
 @Composable
 fun TransactionDetailsContent(

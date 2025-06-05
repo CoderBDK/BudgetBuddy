@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.ui.main
+package com.coderbdk.budgetbuddy.ui.navigation
 
 import androidx.navigation.NavDestination
 import com.coderbdk.budgetbuddy.data.model.TransactionType

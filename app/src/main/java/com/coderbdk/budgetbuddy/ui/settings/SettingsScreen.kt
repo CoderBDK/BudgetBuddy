@@ -20,15 +20,18 @@ import androidx.compose.ui.unit.dp
 import com.coderbdk.budgetbuddy.ui.theme.Typography
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel) {
+fun SettingsScreen(
+    isEnable: Boolean,
+    toggleTheme: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         ThemePrefs(
-            viewModel.isDarkTheme,
-            viewModel::toggleTheme
+            isEnable,
+            toggleTheme
         )
     }
 }

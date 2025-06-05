@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.ui.transaction
+package com.coderbdk.budgetbuddy.ui.transaction.add
 
 
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,64 +31,22 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
-import com.coderbdk.budgetbuddy.ui.main.Screen
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
-import com.coderbdk.budgetbuddy.ui.transaction.dialog.AlertDialogBudgetCreate
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 
 @Composable
 fun AddTransactionScreen(
-    navController: NavController,
-    viewModel: AddTransactionViewModel = hiltViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
-    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
-
-    if (uiState.isBudgetCreationRequired) {
-        AlertDialogBudgetCreate(
-            onDismissRequest = viewModel::hideBudgetCreation
-        ) {
-            navController.navigate(Screen.Budgets)
-        }
-    }
-    if (expenseCategoryList.isEmpty()) return
-
-    AddTransactionScreen(
-        navController = navController,
-        expenseCategoryList = expenseCategoryList,
-        incomeCategoryList = incomeCategoryList,
-        uiState = uiState,
-        uiEvent = TransactionUiEvent(
-            onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
-            onIncomeCategoryChange = viewModel::onIncomeCategoryChange,
-            onPeriodChange = viewModel::onPeriodChange,
-            onRecurringChange = viewModel::onRecurringChange,
-            onAmountChange = viewModel::onAmountChange,
-            onTypeChange = viewModel::onTypeChange,
-            onNotesChange = viewModel::onNotesChange,
-            saveTransaction = viewModel::saveTransaction
-        )
-    )
-}
-
-@Composable
-fun AddTransactionScreen(
-    navController: NavController,
     expenseCategoryList: List<ExpenseCategory>,
     incomeCategoryList: List<IncomeCategory>,
     uiState: TransactionUiState,
-    uiEvent: TransactionUiEvent
+    uiEvent: TransactionUiEvent,
+    onNavigateToCategoryManage: (TransactionType) -> Unit
 ) {
     var selectedTypeIndex by remember { mutableIntStateOf(TransactionType.valueOf(uiState.type.name).ordinal) }
     val typeEntries = remember {
@@ -206,7 +163,7 @@ fun AddTransactionScreen(
                 trailingContent = {
                     IconButton(
                         onClick = {
-                            navController.navigate(Screen.CategoryManage(TransactionType.EXPENSE))
+                            onNavigateToCategoryManage(TransactionType.EXPENSE)
                         }
                     ) {
                         Icon(Icons.Default.Settings, "manage")
@@ -238,7 +195,7 @@ fun AddTransactionScreen(
                 trailingContent = {
                     IconButton(
                         onClick = {
-                            navController.navigate(Screen.CategoryManage(TransactionType.INCOME))
+                            onNavigateToCategoryManage(TransactionType.INCOME)
                         }
                     ) {
                         Icon(Icons.Default.Settings, "manage")
@@ -275,11 +232,11 @@ fun AddTransactionScreen(
 fun AddTransactionPreview(modifier: Modifier = Modifier) {
     BudgetBuddyTheme {
         AddTransactionScreen(
-            navController = rememberNavController(),
             expenseCategoryList = emptyList(),
             incomeCategoryList = emptyList(),
             uiState = TransactionUiState(),
-            uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {}, {})
+            uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {}, {}),
+            onNavigateToCategoryManage = {}
         )
     }
 }

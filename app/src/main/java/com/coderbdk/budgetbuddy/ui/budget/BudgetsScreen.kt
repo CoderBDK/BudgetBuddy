@@ -1,10 +1,8 @@
 package com.coderbdk.budgetbuddy.ui.budget
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +29,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,11 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
-import com.coderbdk.budgetbuddy.data.model.DefaultExpenseCategory
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
 import com.coderbdk.budgetbuddy.ui.main.FabAction
@@ -69,26 +64,29 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @Composable
-fun BudgetScreen(viewModel: BudgetViewModel = hiltViewModel(), mainViewModel: MainViewModel) {
-
-    val budgets by viewModel.budgetsFlow.collectAsStateWithLifecycle(emptyList())
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val fabAction by mainViewModel.fabAction.collectAsState()
-    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
+fun BudgetScreen(
+    fabAction: FabAction?,
+    budgets: List<BudgetWithCategory>,
+    expenseCategoryList: List<ExpenseCategory>,
+    uiState: BudgetUiState,
+    addBudget: (Int, BudgetPeriod, Double, Pair<Long, Long>) -> Unit,
+    updateBudgetCancel: () -> Unit,
+    updateBudget: () -> Unit,
+    clearFacAction: () -> Unit
+) {
 
     var showDialog by remember { mutableStateOf(false) }
 
     ShowBudgetExistsDialog(
         uiState.budgetExists,
-        viewModel::updateBudgetCancel,
-        viewModel::updateBudget
+        updateBudgetCancel,
+        updateBudget
     )
     LaunchedEffect(fabAction) {
         if (fabAction is FabAction.AddBudget) {
             showDialog = true
-            mainViewModel.clearAction()
+            clearFacAction()
         }
     }
 
@@ -116,7 +114,7 @@ fun BudgetScreen(viewModel: BudgetViewModel = hiltViewModel(), mainViewModel: Ma
             expenseCategoryList = expenseCategoryList,
             onDismiss = { showDialog = false },
             onSave = { category, amount, period, date ->
-                viewModel.addBudget(category.id, period, amount, date)
+                addBudget(category.id, period, amount, date)
                 showDialog = false
             },
         )
@@ -145,7 +143,7 @@ fun BudgetItem(budgetWithCategory: BudgetWithCategory) {
                 Text("${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}")
             },
             supportingContent = {
-                val color = Color(budgetWithCategory.expenseCategory?.colorCode?:0xFFFFFFF)
+                val color = Color(budgetWithCategory.expenseCategory?.colorCode ?: 0xFFFFFFF)
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
@@ -164,7 +162,7 @@ fun BudgetItem(budgetWithCategory: BudgetWithCategory) {
 fun AddBudgetDialog(
     expenseCategoryList: List<ExpenseCategory>,
     onDismiss: () -> Unit,
-    onSave: (ExpenseCategory, Double, BudgetPeriod, Pair<Long,Long>) -> Unit
+    onSave: (ExpenseCategory, Double, BudgetPeriod, Pair<Long, Long>) -> Unit
 ) {
 
     var category by remember { mutableStateOf(expenseCategoryList[0]) }
@@ -198,7 +196,9 @@ fun AddBudgetDialog(
 
     if (showModalState == 1 || showModalState == 2) {
         DatePickerModal(
-            onDateSelected = { if(showModalState == 1) selectedStartDate = it else selectedEndDate = it },
+            onDateSelected = {
+                if (showModalState == 1) selectedStartDate = it else selectedEndDate = it
+            },
             onDismiss = { showModalState = 0 }
         )
     }
@@ -305,7 +305,12 @@ fun AddBudgetDialog(
             Button(
                 onClick = {
                     val budgetAmount = amount.toDoubleOrNull()
-                    onSave(category, budgetAmount ?: 0.0, period, Pair(selectedStartDate?:0, selectedEndDate?:0))
+                    onSave(
+                        category,
+                        budgetAmount ?: 0.0,
+                        period,
+                        Pair(selectedStartDate ?: 0, selectedEndDate ?: 0)
+                    )
                 }
             ) {
                 Text("Save")
@@ -379,7 +384,7 @@ fun AddBudgetPreview() {
     BudgetBuddyTheme {
         AddBudgetDialog(
             expenseCategoryList = listOf(ExpenseCategory(0, "C")),
-            onSave = { _, _, _,_ -> },
+            onSave = { _, _, _, _ -> },
             onDismiss = {}
         )
     }

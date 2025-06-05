@@ -1,4 +1,4 @@
-package com.coderbdk.budgetbuddy.ui.transaction
+package com.coderbdk.budgetbuddy.ui.transaction.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

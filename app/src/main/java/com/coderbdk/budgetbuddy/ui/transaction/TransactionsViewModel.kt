@@ -63,11 +63,11 @@ class TransactionsViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
-    fun updateFilter(updatedFilter: TransactionFilter) {
+    fun onFilterChange(updatedFilter: TransactionFilter) {
         _filter.value = updatedFilter
     }
 
-    fun setSearchQuery(query: String) {
+    fun onSearchQueryChange(query: String) {
         _filter.value = _filter.value.copy(query = query)
     }
 }

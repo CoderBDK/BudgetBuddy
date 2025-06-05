@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun AlertDialogBudgetCreate(
     onDismissRequest: () -> Unit,
-    goto: () -> Unit
+    onNavigateToBudgets: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -17,7 +17,7 @@ fun AlertDialogBudgetCreate(
         confirmButton = {
             Button(onClick = {
                 onDismissRequest()
-                goto()
+                onNavigateToBudgets()
             }) {
                 Text("Create Budget")
             }

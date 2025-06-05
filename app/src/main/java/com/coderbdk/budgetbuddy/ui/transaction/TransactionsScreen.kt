@@ -46,42 +46,46 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
 import com.coderbdk.budgetbuddy.data.db.entity.IncomeCategory
+import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.TransactionFilter
 import com.coderbdk.budgetbuddy.data.model.TransactionType
-import com.coderbdk.budgetbuddy.ui.main.Screen
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
+import com.coderbdk.budgetbuddy.ui.navigation.Screen
 import com.coderbdk.budgetbuddy.ui.transaction.content.TransactionItem
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
 fun TransactionsScreen(
-    navController: NavController,
-    viewModel: TransactionsViewModel = hiltViewModel()
+    transactions: LazyPagingItems<TransactionWithBothCategories>,
+    expenseCategoryList: List<ExpenseCategory>,
+    incomeCategoryList: List<IncomeCategory>,
+    filter: TransactionFilter,
+    onSearchQueryChange: (String) -> Unit,
+    onFilterChange: (TransactionFilter) -> Unit,
+    onNavigateToTransactionDetails: (TransactionWithBothCategories) -> Unit
 ) {
-    val transactions = viewModel.filteredTransactions.collectAsLazyPagingItems()
-    val filter by viewModel.filter.collectAsState()
-    val expenseCategoryList by viewModel.expenseCategories.collectAsState(initial = emptyList())
-    val incomeCategoryList by viewModel.incomeCategories.collectAsState(initial = emptyList())
 
     Column(modifier = Modifier.fillMaxSize()) {
         SearchAndFilterBar(
             expenseCategoryList = expenseCategoryList,
             incomeCategoryList = incomeCategoryList,
             filter = filter,
-            onSearchQueryChange = { viewModel.setSearchQuery(it) },
-            onFilterChange = { viewModel.updateFilter(it) }
+            onSearchQueryChange = onSearchQueryChange,
+            onFilterChange = onFilterChange
         )
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(transactions.itemCount) {
                 val item = transactions[it]
                 if (item != null) {
-                    TransactionItem(item) {
-                        navController.navigate(Screen.TransactionDetails(Json.encodeToString(item)))
-                    }
+                    TransactionItem(item, gotoDetails = {
+                        onNavigateToTransactionDetails(item)
+                    })
                 }
             }
             transactions.apply {
