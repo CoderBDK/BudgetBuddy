@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">BudgetBuddy</string>
+
+    <string name="nav_title_home">Home</string>
+    <string name="nav_title_add_transaction">Add Transaction</string>
+    <string name="nav_title_budgets">Budgets</string>
+    <string name="nav_title_analytics">Analytics</string>
+    <string name="nav_title_settings">Settings</string>
+    <string name="nav_title_transactions">Transactions</string>
+    <string name="nav_title_transaction_details">Transaction Details</string>
+    <string name="nav_title_category_manage">Category Manage</string>
+
 </resources>

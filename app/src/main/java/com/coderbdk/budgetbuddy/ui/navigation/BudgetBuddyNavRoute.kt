@@ -1,6 +1,8 @@
 package com.coderbdk.budgetbuddy.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.navigation.NavDestination
+import com.coderbdk.budgetbuddy.R
 import com.coderbdk.budgetbuddy.data.model.TransactionType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,32 +11,36 @@ import kotlin.reflect.full.primaryConstructor
 
 @Serializable
 sealed class Screen(
+    @StringRes
     @SerialName("title")
-    val title: String
+    val title: Int
 ) {
-    @Serializable
-    data object Home : Screen("Home")
 
     @Serializable
-    data object AddTransaction : Screen("Add Transaction")
+    data object Home : Screen(R.string.nav_title_home)
 
     @Serializable
-    data object Budgets : Screen("Budgets")
+    data object AddTransaction : Screen(R.string.nav_title_add_transaction)
 
     @Serializable
-    data object Analytics : Screen("Analytics")
+    data object Budgets : Screen(R.string.nav_title_budgets)
 
     @Serializable
-    data object Settings : Screen("Settings")
+    data object Analytics : Screen(R.string.nav_title_analytics)
 
     @Serializable
-    data object Transactions : Screen("Transactions")
+    data object Settings : Screen(R.string.nav_title_settings)
 
     @Serializable
-    data class TransactionDetails(val transactionData: String) : Screen("Transaction Details")
+    data object Transactions : Screen(R.string.nav_title_transactions)
 
     @Serializable
-    data class CategoryManage(val type: TransactionType): Screen("CategoryManage")
+    data class TransactionDetails(val transactionData: String) :
+        Screen(R.string.nav_title_transaction_details)
+
+    @Serializable
+    data class CategoryManage(val type: TransactionType) :
+        Screen(R.string.nav_title_category_manage)
 }
 
 private val titleMap by lazy {
@@ -44,7 +50,7 @@ private val titleMap by lazy {
     }
 }
 
-private fun getTitle(it: KClass<out Screen>): String? {
+private fun getTitle(it: KClass<out Screen>): Int? {
     return when {
         it.primaryConstructor != null -> {
             val constructor = it.primaryConstructor
@@ -71,7 +77,7 @@ private fun getTitle(it: KClass<out Screen>): String? {
     }
 }
 
-fun NavDestination.getNavDestinationTitle(defaultTitle: String): String {
+fun NavDestination.getNavDestinationTitle(@StringRes defaultTitle: Int): Int {
     val routeKey = route?.substringBefore("/") ?: ""
     return titleMap[routeKey] ?: defaultTitle
 }
