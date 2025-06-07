@@ -4,82 +4,64 @@ import androidx.annotation.StringRes
 import androidx.navigation.NavDestination
 import com.coderbdk.budgetbuddy.R
 import com.coderbdk.budgetbuddy.data.model.TransactionType
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.reflect.KClass
-import kotlin.reflect.full.primaryConstructor
+
 
 @Serializable
-sealed class Screen(
-    @StringRes
-    @SerialName("title")
-    val title: Int
-) {
+sealed class Screen {
 
     @Serializable
-    data object Home : Screen(R.string.nav_title_home)
+    data object Home : Screen()
 
     @Serializable
-    data object AddTransaction : Screen(R.string.nav_title_add_transaction)
+    data object AddTransaction : Screen()
 
     @Serializable
-    data object Budgets : Screen(R.string.nav_title_budgets)
+    data object Budgets : Screen()
 
     @Serializable
-    data object Analytics : Screen(R.string.nav_title_analytics)
+    data object Analytics : Screen()
 
     @Serializable
-    data object Settings : Screen(R.string.nav_title_settings)
+    data object Settings : Screen()
 
     @Serializable
-    data object Transactions : Screen(R.string.nav_title_transactions)
+    data object Transactions : Screen()
 
     @Serializable
-    data class TransactionDetails(val transactionData: String) :
-        Screen(R.string.nav_title_transaction_details)
+    data class TransactionDetails(val transactionData: String) : Screen()
 
     @Serializable
-    data class CategoryManage(val type: TransactionType) :
-        Screen(R.string.nav_title_category_manage)
+    data class CategoryManage(val type: TransactionType) : Screen()
 }
 
-private val titleMap by lazy {
-    Screen::class.sealedSubclasses.associate {
-        val title = getTitle(it)
-        it.qualifiedName to title
-    }
+data class RouteMetadata(
+    @StringRes val title: Int,
+)
+
+private val routeMetadataMap: Map<String, RouteMetadata> = buildMap {
+    put<Screen.Home>(R.string.nav_title_home)
+    put<Screen.AddTransaction>(R.string.nav_title_add_transaction)
+    put<Screen.Budgets>(R.string.nav_title_budgets)
+    put<Screen.Analytics>(R.string.nav_title_analytics)
+    put<Screen.Settings>(R.string.nav_title_settings)
+    put<Screen.Transactions>(R.string.nav_title_transactions)
+    put<Screen.TransactionDetails>(R.string.nav_title_transaction_details)
+    put<Screen.CategoryManage>(R.string.nav_title_category_manage)
 }
 
-private fun getTitle(it: KClass<out Screen>): Int? {
-    return when {
-        it.primaryConstructor != null -> {
-            val constructor = it.primaryConstructor
-            val parameters = constructor?.parameters ?: emptyList()
-            if (parameters.isNotEmpty()) {
-                val argumentMap = parameters.associateWith { param ->
-                    when (param.type.classifier) {
-                        String::class -> ""
-                        Int::class -> 0
-                        Boolean::class -> false
-                        TransactionType::class -> TransactionType.INCOME
-                        else -> null
-                    }
-                }
-                constructor?.callBy(argumentMap)?.title
-            } else {
-                it.objectInstance?.title
-            }
-        }
-
-        else -> {
-            it.objectInstance?.title
-        }
-    }
+private inline fun <reified T : Screen> MutableMap<String, RouteMetadata>.put(@StringRes title: Int) {
+    val key = T::class.qualifiedName ?: error("No qualifiedName")
+    put(key, RouteMetadata(title))
 }
 
-fun NavDestination.getNavDestinationTitle(@StringRes defaultTitle: Int): Int {
-    val routeKey = route?.substringBefore("/") ?: ""
-    return titleMap[routeKey] ?: defaultTitle
+fun NavDestination.getNavDestinationMetadata(): RouteMetadata? {
+    val routeKey = route?.substringBefore("/")?: return null
+    return routeMetadataMap[routeKey]
+}
+
+fun RouteMetadata?.getNavDestinationTitle(@StringRes defaultTitle: Int): Int {
+    return this?.title ?: defaultTitle
 }
 
 

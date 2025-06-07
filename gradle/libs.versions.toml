@@ -1,5 +1,5 @@
 [versions]
-agp = "8.8.1"
+agp = "8.9.2"
 composeGlide = "1.0.0-beta01"
 constraintlayoutCompose = "1.1.0"
 coreSplashscreen = "1.2.0-alpha02"

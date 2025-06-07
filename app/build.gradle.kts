@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.coderbdk.budgetbuddy"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.coderbdk.budgetbuddy"
@@ -45,7 +45,7 @@ android {
 
 dependencies {
     // kotlin reflect
-    implementation(kotlin("reflect"))
+   // implementation(kotlin("reflect"))
     // paging
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.paging.compose)

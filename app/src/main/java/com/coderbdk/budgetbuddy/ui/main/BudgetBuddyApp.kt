@@ -60,6 +60,7 @@ import com.coderbdk.budgetbuddy.R
 import com.coderbdk.budgetbuddy.ui.home.HomePreview
 import com.coderbdk.budgetbuddy.ui.navigation.BudgetBuddyNavGraph
 import com.coderbdk.budgetbuddy.ui.navigation.Screen
+import com.coderbdk.budgetbuddy.ui.navigation.getNavDestinationMetadata
 import com.coderbdk.budgetbuddy.ui.navigation.getNavDestinationTitle
 import com.coderbdk.budgetbuddy.ui.settings.SettingsViewModel
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
@@ -113,8 +114,8 @@ fun BudgetBuddyApp() {
             }
         }
     }
-
-    val title = currentDestination?.getNavDestinationTitle(R.string.app_name)?.let { stringResource(it) }
+    val currentRouteMetadata = currentDestination?.getNavDestinationMetadata()
+    val title = currentRouteMetadata?.getNavDestinationTitle(R.string.app_name)?.let { stringResource(it) }
 
     BudgetBuddyTheme(
         darkTheme = settingsViewModel.isDarkTheme
