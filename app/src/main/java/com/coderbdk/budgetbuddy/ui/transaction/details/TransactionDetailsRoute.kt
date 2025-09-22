@@ -20,7 +20,7 @@ fun TransactionDetailsRoute(
     Column(
         Modifier.fillMaxSize()
     ) {
-        TransactionDetailsContent(
+        TransactionDetailsScreen(
             expenseCategoryList,
             incomeCategoryList,
             transaction.transaction
