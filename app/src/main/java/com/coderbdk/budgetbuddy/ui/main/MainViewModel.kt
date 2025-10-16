@@ -29,4 +29,5 @@ class MainViewModel : ViewModel() {
 sealed class FabAction {
     data object AddTransaction : FabAction()
     data object AddBudget : FabAction()
+    data object PrintTransaction : FabAction()
 }

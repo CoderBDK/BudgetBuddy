@@ -63,7 +63,8 @@ fun BudgetBuddyNavGraph(
 
         composable<Screen.Transactions> {
             TransactionsRoute(
-                onNavigateToTransactionDetails = navActions::navigateToTransactionDetails
+                onNavigateToTransactionDetails = navActions::navigateToTransactionDetails,
+                mainViewModel = mainViewModel
             )
         }
         composable<Screen.TransactionDetails> {

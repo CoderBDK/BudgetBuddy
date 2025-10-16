@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.BusinessCenter
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.BusinessCenter
@@ -228,6 +229,13 @@ fun FloatingActionButtonContent(
                 mainViewModel.performFabAction(FabAction.AddBudget)
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Budget")
+            }
+        }
+        Screen.Transactions::class.qualifiedName -> {
+            FloatingActionButton(onClick = {
+                mainViewModel.performFabAction(FabAction.PrintTransaction)
+            }) {
+                Icon(Icons.Default.Print, contentDescription = "Print Transaction")
             }
         }
     }

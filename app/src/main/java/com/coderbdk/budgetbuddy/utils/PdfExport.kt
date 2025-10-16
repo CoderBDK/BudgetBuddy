@@ -5,13 +5,14 @@ import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import androidx.core.net.toFile
 import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
+import java.io.File
 import java.io.IOException
 import java.text.DateFormat
 import java.util.Locale
 
 object PdfExport {
 
-    fun export(uri: Uri, transactions: List<TransactionWithBothCategories>) {
+    fun export(output: File, transactions: List<TransactionWithBothCategories>) {
         val document = PdfDocument()
 
         val pageWidth = 595
@@ -117,7 +118,7 @@ object PdfExport {
         document.finishPage(currentPage)
 
         try {
-            document.writeTo(uri.toFile().outputStream())
+            document.writeTo(output.outputStream())
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
