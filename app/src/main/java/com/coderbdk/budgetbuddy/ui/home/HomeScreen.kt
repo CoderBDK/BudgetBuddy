@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -24,13 +25,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -178,7 +182,6 @@ private fun ExpenseChart(transactions: List<TransactionWithBothCategories>) {
 
 }
 
-
 @Composable
 fun TotalBalanceCard(
     recentTransactions: List<TransactionWithBothCategories>,
@@ -209,25 +212,30 @@ fun TotalBalanceCard(
             ) {
                 Icon(Icons.Default.AddCircle, "transaction")
             }
-            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Column(
-                    Modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Total Income", fontSize = 16.sp, color = Color(0xFF4CAF50))
-                    Text("$${income}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                }
-                Icon(Icons.Default.ElectricBolt, "bolt", tint = Color(0xFFFF9800))
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("Total Expense", fontSize = 16.sp, color = Color(0xFFF44336))
-                    Text("$${expense}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                SummaryItem("Income", income, Color(0xFF4CAF50))
+                SummaryItem("Expense", expense, Color(0xFFF44336))
+                val balance = income - expense
+                SummaryItem("Balance", balance, MaterialTheme.colorScheme.primary, isBold = true)
             }
 
-
         }
+    }
+}
+
+@Composable
+private fun SummaryItem(label: String, amount: Double, color: Color, isBold: Boolean = false) {
+    Column(horizontalAlignment = Alignment.End) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = color)
+        Text(
+            text = "$${String.format("%.2f", amount)}",
+            style = if (isBold) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+            fontWeight = if (isBold) FontWeight.ExtraBold else FontWeight.Bold
+        )
     }
 }
 
@@ -236,74 +244,60 @@ private fun BudgetProgressSection(
     budgets: List<BudgetWithCategory>,
     navigateTo: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Absolute.SpaceBetween
-        ) {
-            Text(
-                text = "Budget Overview",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(16.dp)
-            )
-            IconButton(
-                onClick = navigateTo
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        SectionHeader("Budget Overview", navigateTo)
+
+        budgets.take(3).forEach { item ->
+            val progress = if (item.budget.limitAmount > 0)
+                (item.budget.spentAmount / item.budget.limitAmount).toFloat() else 0f
+
+            Surface(
+                tonalElevation = 2.dp,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, "icon")
-            }
-        }
-        budgets.take(3).forEach { budgetWithCategory ->
-            val budget = budgetWithCategory.budget
-            val spentAmount = budget.spentAmount
-            val totalBudget = budget.limitAmount
-            val progress = (if (totalBudget > 0) spentAmount / totalBudget else 0f).toFloat()
-            Column(modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)) {
-                Text(
-                    "${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}",
-                    fontSize = 14.sp
-                )
-                val color = Color(budgetWithCategory.expenseCategory?.colorCode ?: 0xFFFFFFF)
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp),
-                    color = color //if (progress > 1f) Color.Red.copy(0.6f) else Color.Blue.copy(0.6f)
-                )
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(item.expenseCategory?.name ?: "Unknown", fontWeight = FontWeight.Medium)
+                        Text("$${item.budget.spentAmount} / $${item.budget.limitAmount}", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { progress.coerceIn(0f, 1f) },
+                        modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
+                        color = Color(item.expenseCategory?.colorCode ?: Color.Gray.toArgb()),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
+fun SectionHeader(title: String, onActionClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        TextButton(onClick = onActionClick) {
+            Text("See All")
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(16.dp))
+        }
+    }
+}
 
 private fun LazyListScope.recentTransactionsSection(
     transactions: List<TransactionWithBothCategories>,
     gotoTransactions: () -> Unit
 ) {
     item {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Absolute.SpaceBetween
-        ) {
-            Text(
-                text = "Recent Transactions",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(16.dp)
-            )
-            IconButton(
-                onClick = gotoTransactions
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, "icon")
-            }
-        }
-
+        SectionHeader("Recent Transactions", gotoTransactions, Modifier.padding(horizontal = 16.dp))
     }
     items(transactions.take(3)) { transaction ->
         TransactionItem(transaction) {}
