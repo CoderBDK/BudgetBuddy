@@ -1,13 +1,16 @@
+import com.android.build.api.dsl.ApplicationExtension
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kspTool)
     alias(libs.plugins.daggerHilt)
-    kotlin("plugin.serialization") version "2.0.0"
+    alias(libs.plugins.kotlinSerialization)
 }
 
-android {
+configure<ApplicationExtension> {
     namespace = "com.coderbdk.budgetbuddy"
     compileSdk = 36
 
@@ -24,6 +27,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,12 +38,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -75,8 +82,8 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.constraintlayout.compose)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.material)
     implementation(libs.androidx.navigation.compose)
@@ -96,7 +103,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     // test
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.48")
     kspAndroidTest("com.google.dagger:hilt-android-testing:2.48")
 }
