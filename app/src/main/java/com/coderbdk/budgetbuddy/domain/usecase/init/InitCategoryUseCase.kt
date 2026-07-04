@@ -2,10 +2,14 @@ package com.coderbdk.budgetbuddy.domain.usecase.init
 
 import android.content.Context
 import com.coderbdk.budgetbuddy.data.repository.InitRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
-class InitCategoryUseCase @Inject constructor(private val initRepository: InitRepository) {
-    operator fun invoke(context: Context) {
+class InitCategoryUseCase @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+    private val initRepository: InitRepository
+) {
+    operator fun invoke() {
         initRepository.initCategory(context)
     }
 }
