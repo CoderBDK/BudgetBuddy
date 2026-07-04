@@ -26,7 +26,7 @@ configure<ApplicationExtension> {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -51,8 +51,6 @@ kotlin {
 }
 
 dependencies {
-    // kotlin reflect
-   // implementation(kotlin("reflect"))
     // paging
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.paging.compose)
@@ -79,7 +77,6 @@ dependencies {
     // glide image loader
     implementation(libs.compose.glide)
     // android compose
-    implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.material.icons.core)

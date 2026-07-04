@@ -22,7 +22,6 @@ preferenceKtx = "1.2.1"
 daggerHilt = "2.59.2"
 ksp = "2.3.2"
 roomVersion = "2.8.4"
-runtimeLivedata = "1.11.0"
 
 
 [libraries]
@@ -40,7 +39,6 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomVersion" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
-androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 compose-glide = { module = "com.github.bumptech.glide:compose", version.ref = "composeGlide" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
