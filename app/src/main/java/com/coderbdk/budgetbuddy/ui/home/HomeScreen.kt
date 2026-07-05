@@ -21,20 +21,18 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.outlined.RemoveRedEye
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,11 +43,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -88,7 +86,7 @@ fun HomeScreen(
 
     ) {
 
-    val pagerState = rememberPagerState(initialPage = 1, pageCount = { 2 })
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
 
     LazyColumn(
         modifier = Modifier
@@ -163,30 +161,51 @@ fun BalanceCard(
         )
     )
 
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Box(
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .background(premiumGradient)
-                .padding(24.dp)
+
         ) {
-            Column (
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-
-
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(premiumGradient)
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
                     text = buildAnnotatedString {
-                        if(balance < 0 ) append("-")
-                        withStyle(SpanStyle(baselineShift = BaselineShift.Superscript, fontSize = 18.sp)) {
+                        withStyle(
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+
+                                )
+                        ) {
+                            append("Total Balance\n\n")
+                        }
+                        if (balance < 0) {
+                            append("-")
+                            withStyle(
+                                SpanStyle(
+                                    baselineShift = BaselineShift.Superscript,
+                                    fontSize = 18.sp
+                                )
+                            ) {
+                                append("$")
+                            }
+                        } else {
                             append("$")
                         }
+
                         withStyle(SpanStyle()) {
                             append(String.format("%.2f", balance.absoluteValue))
                         }
@@ -194,70 +213,91 @@ fun BalanceCard(
                     },
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.ExtraBold,
-                    color = if(balance < 0) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.4f) else MaterialTheme.colorScheme.onPrimaryContainer
+                    color = if (balance < 0) MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                        0.4f
+                    ) else MaterialTheme.colorScheme.onPrimaryContainer,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
                 )
 
-                Text(
-                    text = "TOTAL BALANCE",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(alignment = Alignment.TopEnd)
                 ) {
-                    IncomeExpenseItem(
-                        title = "INCOME",
-                        amount = income,
-                        isIncome = true
-                    )
-                    IncomeExpenseItem(
-                        title = "EXPENSE",
-                        amount = expense,
-                        isIncome = false
+                    Icon(
+                        imageVector = Icons.Outlined.RemoveRedEye,
+                        contentDescription = null,
+                        tint = colorScheme.onTertiaryContainer,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IncomeExpenseItem(
+                modifier = Modifier.weight(1f),
+                title = "INCOME",
+                amount = income,
+                isIncome = true
+            )
+            Spacer(Modifier.width(16.dp))
+            IncomeExpenseItem(
+                modifier = Modifier.weight(1f),
+                title = "EXPENSE",
+                amount = expense,
+                isIncome = false
+            )
         }
     }
 }
 
 @Composable
-private fun IncomeExpenseItem(title: String, amount: Double, isIncome: Boolean) {
+private fun IncomeExpenseItem(
+    modifier: Modifier = Modifier,
+    title: String,
+    amount: Double,
+    isIncome: Boolean
+) {
     val icon = if (isIncome) Icons.Rounded.ArrowDownward else Icons.Rounded.ArrowUpward
     val iconBgColor = if (isIncome) Color(0xFF4CAF50).copy(0.2f) else Color(0xFFF44336).copy(0.2f)
     val iconColor = if (isIncome) Color(0xFF4CAF50) else Color(0xFFF44336)
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(iconBgColor),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = "$${String.format("%.2f", amount)}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+    ElevatedCard(modifier = modifier) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(iconBgColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "$${String.format("%.2f", amount)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
@@ -419,7 +459,7 @@ private fun BudgetProgressSection(
                     color = Color(item.expenseCategory?.colorCode ?: Color.Gray.toArgb()),
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
         }
@@ -430,15 +470,13 @@ private fun BudgetProgressSection(
 fun SectionHeader(title: String, onActionClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         TextButton(onClick = onActionClick) {
             Text("See All")
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -483,8 +521,8 @@ fun HomePreview() {
     ) {
         HomeScreen(
             uiState = HomeUiState(
-                totalIncome = 10.0,
-                totalExpense = 2.0,
+                totalIncome = 100000000.0,
+                totalExpense = 200.0,
                 recentTransactions = transactions,
                 budgets = listOf(
                     BudgetWithCategory(
