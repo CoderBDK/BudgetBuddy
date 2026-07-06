@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -140,8 +141,12 @@ fun HomeScreen(
                 }
             }
 
-            BudgetProgressSection(uiState.budgets, onNavigateToBudgets)
+            OutlinedCard(Modifier.padding(16.dp)) {
+                BudgetProgressSection(uiState.budgets, onNavigateToBudgets)
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
         }
         recentTransactionsSection(uiState.recentTransactions, onNavigateToTransactions)
     }
@@ -435,10 +440,16 @@ private fun BudgetProgressSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Box(modifier = Modifier.size(16.dp, 8.dp).padding(horizontal = 4.dp).background(
+                        Color( item.expenseCategory?.colorCode?: Color.Black.toArgb()),
+                        CircleShape
+                    ))
+
                     Text(
                         item.expenseCategory?.name?.lowercase()?.capitalizeFirstLetter()
                             ?: "Unknown",
                     )
+                    Spacer(Modifier.weight(1f))
                     Text(
                         text = buildAnnotatedString {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
