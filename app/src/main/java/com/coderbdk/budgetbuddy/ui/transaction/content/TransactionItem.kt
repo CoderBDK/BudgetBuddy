@@ -78,9 +78,13 @@ fun TransactionItem(transaction: TransactionWithBothCategories, gotoDetails: () 
                 )
             }
 
+            val period =
+                transaction.transaction.period?.name?.lowercase()?.capitalizeFirstLetter()
+                    ?: "Unknown"
+            val date = dateFormatter.format(Date(transaction.transaction.transactionDate))
 
             Text(
-                dateFormatter.format(Date(transaction.transaction.transactionDate)),
+                text = "$date • $period",
                 fontSize = 12.sp
             )
         }

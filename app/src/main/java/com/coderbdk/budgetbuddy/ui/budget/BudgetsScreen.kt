@@ -1,8 +1,11 @@
 package com.coderbdk.budgetbuddy.ui.budget
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,15 +13,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -26,38 +30,46 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.coderbdk.budgetbuddy.data.db.entity.Budget
 import com.coderbdk.budgetbuddy.data.db.entity.ExpenseCategory
+import com.coderbdk.budgetbuddy.data.db.entity.Transaction
 import com.coderbdk.budgetbuddy.data.model.BudgetPeriod
 import com.coderbdk.budgetbuddy.data.model.BudgetWithCategory
+import com.coderbdk.budgetbuddy.data.model.TransactionType
+import com.coderbdk.budgetbuddy.data.model.TransactionWithBothCategories
 import com.coderbdk.budgetbuddy.ui.components.DropDownEntry
 import com.coderbdk.budgetbuddy.ui.components.DropDownMenu
+import com.coderbdk.budgetbuddy.ui.home.dateFormatter
 import com.coderbdk.budgetbuddy.ui.main.FabAction
-import com.coderbdk.budgetbuddy.ui.main.MainViewModel
 import com.coderbdk.budgetbuddy.ui.theme.BudgetBuddyTheme
 import com.coderbdk.budgetbuddy.utils.TextUtils.capitalizeFirstLetter
 import java.text.SimpleDateFormat
@@ -90,23 +102,14 @@ fun BudgetScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
+    LazyColumn(
+        Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Your Budget", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-
-        LazyColumn(
-            Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp)
-        ) {
-            items(budgets) { budget ->
-                BudgetItem(budget)
-            }
+        items(budgets) { budget ->
+            BudgetItem(budget)
         }
-
     }
 
     if (showDialog) {
@@ -127,20 +130,62 @@ fun BudgetItem(budgetWithCategory: BudgetWithCategory) {
     val spentAmount = budget.spentAmount
     val totalBudget = budget.limitAmount
     val progress = (if (totalBudget > 0) spentAmount / totalBudget else 0f).toFloat()
-    Card(
+
+    OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         elevation = CardDefaults.elevatedCardElevation()
     ) {
         ListItem(
+
             overlineContent = {
+                val period = budget.period.name.lowercase().capitalizeFirstLetter()
+                val date = dateFormatter.format(Date(budget.creationTimestamp))
                 Text(
-                    "Spent: ${spentAmount.toInt()} / ${budget.limitAmount.toInt()} $",
+                    text = "$date • $period",
+                    fontSize = 12.sp
                 )
             },
             headlineContent = {
-                Text("${budgetWithCategory.expenseCategory?.name}: ${spentAmount}/${totalBudget}")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp, 8.dp)
+                            .padding(horizontal = 4.dp)
+                            .background(
+                                Color(
+                                    budgetWithCategory.expenseCategory?.colorCode
+                                        ?: Color.Black.toArgb()
+                                ),
+                                CircleShape
+                            )
+                    )
+                    Text(
+                        "${
+                            budgetWithCategory.expenseCategory?.name?.lowercase()
+                                ?.capitalizeFirstLetter()
+                        }"
+                    )
+
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("$${spentAmount}")
+                            }
+                            append("/$${totalBudget}")
+                        },
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+
+                }
+
             },
             supportingContent = {
                 val color = Color(budgetWithCategory.expenseCategory?.colorCode ?: 0xFFFFFFF)
@@ -381,11 +426,61 @@ fun ShowBudgetExistsDialog(budgetExists: Boolean, onCancel: () -> Unit, onUpdate
 @Preview(showBackground = true)
 @Composable
 fun AddBudgetPreview() {
-    BudgetBuddyTheme {
-        AddBudgetDialog(
-            expenseCategoryList = listOf(ExpenseCategory(0, "C")),
-            onSave = { _, _, _, _ -> },
-            onDismiss = {}
+    val transactions = listOf(
+        TransactionWithBothCategories(
+            transaction = Transaction(
+                type = TransactionType.EXPENSE,
+                amount = 120.0,
+                transactionDate = 16 * 10000
+            ),
+            incomeCategory = null,
+            expenseCategory = ExpenseCategory(name = "Food")
+        ),
+        TransactionWithBothCategories(
+            transaction = Transaction(
+                type = TransactionType.EXPENSE,
+                amount = 10.0,
+                transactionDate = 16 * 10000
+            ),
+            incomeCategory = null,
+            expenseCategory = ExpenseCategory(name = "Medical")
         )
+    )
+    BudgetBuddyTheme {
+        /* AddBudgetDialog(
+             expenseCategoryList = listOf(ExpenseCategory(0, "C")),
+             onSave = { _, _, _, _ -> },
+             onDismiss = {}
+         )*/
+
+        BudgetScreen(
+            fabAction = null,
+            budgets = listOf(
+                BudgetWithCategory(
+                    budget = Budget(
+                        expenseCategoryId = 0,
+                        period = BudgetPeriod.DAILY,
+                        limitAmount = 0.0,
+                        startDate = 0L,
+                        endDate = 0L
+                    ),
+                    expenseCategory = ExpenseCategory(name = "Food")
+                ),
+                BudgetWithCategory(
+                    budget = Budget(
+                        expenseCategoryId = 0,
+                        period = BudgetPeriod.DAILY,
+                        limitAmount = 0.0,
+                        startDate = 0L,
+                        endDate = 0L
+                    ),
+                    expenseCategory = ExpenseCategory(name = "Rent")
+                )
+            ),
+            expenseCategoryList = emptyList(),
+            uiState = BudgetUiState(),
+            { _, _, _, _ -> }, {}, {}, {}
+        )
+
     }
 }

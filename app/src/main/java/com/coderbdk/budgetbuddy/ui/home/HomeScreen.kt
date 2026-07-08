@@ -445,9 +445,11 @@ private fun BudgetProgressSection(
                         CircleShape
                     ))
 
+                    val expenseCategoryName =  item.expenseCategory?.name?.lowercase()?.capitalizeFirstLetter()
+                        ?: "Unknown"
+
                     Text(
-                        item.expenseCategory?.name?.lowercase()?.capitalizeFirstLetter()
-                            ?: "Unknown",
+                       text = "${item.budget.period.name.lowercase().capitalizeFirstLetter()} • $expenseCategoryName",
                     )
                     Spacer(Modifier.weight(1f))
                     Text(
