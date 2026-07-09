@@ -35,17 +35,17 @@ data class TransactionUiState(
     val isBudgetCreationRequired: Boolean = false,
 )
 
-data class TransactionUiEvent(
-    val onAmountChange: (String) -> Unit,
-    val onExpenseCategoryChange: (ExpenseCategory?) -> Unit,
-    val onIncomeCategoryChange: (IncomeCategory?) -> Unit,
-    val onPeriodChange: (BudgetPeriod?) -> Unit,
-    val onTypeChange: (TransactionType) -> Unit,
-    val onRecurringChange: (Boolean) -> Unit,
-    val onNotesChange: (String) -> Unit,
-    val saveTransaction: () -> Unit
-)
-
+sealed interface TransactionUiEvent {
+    data class OnAmountChange(val amount: String) : TransactionUiEvent
+    data class OnExpenseCategoryChange(val category: ExpenseCategory?) : TransactionUiEvent
+    data class OnIncomeCategoryChange(val category: IncomeCategory?) : TransactionUiEvent
+    data class OnPeriodChange(val period: BudgetPeriod?) : TransactionUiEvent
+    data class OnTypeChange(val type: TransactionType) : TransactionUiEvent
+    data class OnRecurringChange(val isRecurring: Boolean) : TransactionUiEvent
+    data class OnNotesChange(val notes: String) : TransactionUiEvent
+    data object SaveTransaction : TransactionUiEvent
+    data object DismissBudgetDialog : TransactionUiEvent
+}
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val insertTransactionWithBudgetIncrementUseCase: InsertTransactionWithBudgetIncrementUseCase,
@@ -68,8 +68,22 @@ class AddTransactionViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-
-    fun saveTransaction() {
+    
+    fun onEvent(event: TransactionUiEvent) {
+        when (event) {
+            is TransactionUiEvent.OnAmountChange -> onAmountChange(event.amount)
+            is TransactionUiEvent.OnNotesChange -> onNotesChange(event.notes)
+            is TransactionUiEvent.OnTypeChange -> onTypeChange(event.type)
+            is TransactionUiEvent.OnPeriodChange -> onPeriodChange(event.period)
+            is TransactionUiEvent.OnRecurringChange -> onRecurringChange(event.isRecurring)
+            is TransactionUiEvent.OnExpenseCategoryChange -> onExpenseCategoryChange(event.category)
+            is TransactionUiEvent.OnIncomeCategoryChange -> onIncomeCategoryChange(event.category)
+            TransactionUiEvent.SaveTransaction -> saveTransaction()
+            TransactionUiEvent.DismissBudgetDialog -> hideBudgetCreation()
+        }
+    }
+    
+    private fun saveTransaction() {
 
         viewModelScope.launch {
 
@@ -104,14 +118,14 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun onAmountChange(amount: String) {
+    private fun onAmountChange(amount: String) {
         _uiState.update {
             it.copy(amount = amount.toDoubleOrNull() ?: 0.0)
         }
     }
 
 
-    fun onExpenseCategoryChange(category: ExpenseCategory?) {
+    private fun onExpenseCategoryChange(category: ExpenseCategory?) {
         _uiState.update {
             it.copy(
                 expenseCategory = category,
@@ -120,17 +134,16 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun onIncomeCategoryChange(category: IncomeCategory?) {
+   private fun onIncomeCategoryChange(category: IncomeCategory?) {
         _uiState.update {
             it.copy(
                 incomeCategory = category,
                 expenseCategory = null,
-                period = null
             )
         }
     }
 
-    fun onPeriodChange(value: BudgetPeriod?) {
+    private fun onPeriodChange(value: BudgetPeriod?) {
         _uiState.update {
             it.copy(
                 period = value
@@ -138,7 +151,7 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun onTypeChange(value: TransactionType) {
+    private fun onTypeChange(value: TransactionType) {
         _uiState.update {
             it.copy(
                 type = value
@@ -146,7 +159,7 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun onRecurringChange(value: Boolean) {
+    private fun onRecurringChange(value: Boolean) {
         _uiState.update {
             it.copy(
                 isRecurring = value
@@ -154,7 +167,7 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun onNotesChange(value: String) {
+    private fun onNotesChange(value: String) {
         _uiState.update {
             it.copy(
                 notes = value
@@ -162,7 +175,7 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun hideBudgetCreation() {
+    private fun hideBudgetCreation() {
         _uiState.update {
             it.copy(
                 isBudgetCreationRequired = false

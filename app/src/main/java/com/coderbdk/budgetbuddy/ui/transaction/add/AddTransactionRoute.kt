@@ -3,6 +3,7 @@ package com.coderbdk.budgetbuddy.ui.transaction.add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.coderbdk.budgetbuddy.data.model.TransactionType
@@ -21,7 +22,7 @@ fun AddTransactionRoute(
 
     if (uiState.isBudgetCreationRequired) {
         AlertDialogBudgetCreate(
-            onDismissRequest = viewModel::hideBudgetCreation,
+            onDismissRequest = { viewModel.onEvent(TransactionUiEvent.DismissBudgetDialog) },
             onNavigateToBudgets = onNavigateToBudgets
         )
     }
@@ -31,16 +32,7 @@ fun AddTransactionRoute(
         expenseCategoryList = expenseCategoryList,
         incomeCategoryList = incomeCategoryList,
         uiState = uiState,
-        uiEvent = TransactionUiEvent(
-            onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
-            onIncomeCategoryChange = viewModel::onIncomeCategoryChange,
-            onPeriodChange = viewModel::onPeriodChange,
-            onRecurringChange = viewModel::onRecurringChange,
-            onAmountChange = viewModel::onAmountChange,
-            onTypeChange = viewModel::onTypeChange,
-            onNotesChange = viewModel::onNotesChange,
-            saveTransaction = viewModel::saveTransaction
-        ),
+        onEvent = viewModel::onEvent,
         onNavigateToCategoryManage = onNavigateToCategoryManage
     )
 }

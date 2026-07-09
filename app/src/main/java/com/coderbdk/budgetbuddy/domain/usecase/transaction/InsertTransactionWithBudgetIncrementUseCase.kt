@@ -26,12 +26,13 @@ class InsertTransactionWithBudgetIncrementUseCase @Inject constructor(
 
             }
 
-            transactionRepository.insertTransaction(transaction)
+            transactionRepository.insertTransaction(transaction.copy(
+                incomeCategoryId = null
+            ))
         } else {
             transactionRepository.insertTransaction(
                 transaction.copy(
                     expenseCategoryId = null,
-                    period = null
                 )
             )
         }

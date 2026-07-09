@@ -1,6 +1,7 @@
 package com.coderbdk.budgetbuddy.ui.transaction.add
 
 
+import android.R.attr.data
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,7 +46,7 @@ fun AddTransactionScreen(
     expenseCategoryList: List<ExpenseCategory>,
     incomeCategoryList: List<IncomeCategory>,
     uiState: TransactionUiState,
-    uiEvent: TransactionUiEvent,
+    onEvent: (TransactionUiEvent) -> Unit,
     onNavigateToCategoryManage: (TransactionType) -> Unit
 ) {
     var selectedTypeIndex by remember { mutableIntStateOf(TransactionType.valueOf(uiState.type.name).ordinal) }
@@ -118,7 +119,9 @@ fun AddTransactionScreen(
         Spacer(Modifier.padding(8.dp))
         OutlinedTextField(
             value = uiState.amount.toString(),
-            onValueChange = uiEvent.onAmountChange,
+            onValueChange = {
+                onEvent(TransactionUiEvent.OnAmountChange(it))
+            },
             label = { Text("Amount") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
@@ -131,7 +134,9 @@ fun AddTransactionScreen(
         Spacer(Modifier.padding(8.dp))
         OutlinedTextField(
             value = uiState.notes,
-            onValueChange = uiEvent.onNotesChange,
+            onValueChange = {
+                onEvent(TransactionUiEvent.OnNotesChange(it))
+            },
             label = { Text("Notes") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
@@ -149,7 +154,9 @@ fun AddTransactionScreen(
             selectedIndex = selectedTypeIndex,
             onSelected = { data, index ->
                 selectedTypeIndex = index
-                uiEvent.onTypeChange(data)
+
+                onEvent(TransactionUiEvent.OnTypeChange(data))
+
             }
         )
         if (uiState.type == TransactionType.EXPENSE) {
@@ -171,18 +178,7 @@ fun AddTransactionScreen(
                 },
                 onSelected = { data, index ->
                     selectedExpenseCategoryIndex = index
-                    uiEvent.onExpenseCategoryChange(data)
-                }
-            )
-            Spacer(Modifier.padding(8.dp))
-            DropDownMenu(
-                modifier = Modifier,
-                title = "Transaction Period",
-                entries = periodEntries,
-                selectedIndex = selectedPeriodIndex,
-                onSelected = { data, index ->
-                    selectedPeriodIndex = index
-                    uiEvent.onPeriodChange(data)
+                    onEvent(TransactionUiEvent.OnExpenseCategoryChange(data))
                 }
             )
         } else {
@@ -203,20 +199,36 @@ fun AddTransactionScreen(
                 },
                 onSelected = { data, index ->
                     selectedIncomeCategoryIndex = index
-                    uiEvent.onIncomeCategoryChange(data)
+                    onEvent(TransactionUiEvent.OnIncomeCategoryChange(data))
                 }
             )
         }
 
+        Spacer(Modifier.padding(8.dp))
+        DropDownMenu(
+            modifier = Modifier,
+            title = "Transaction Period",
+            entries = periodEntries,
+            selectedIndex = selectedPeriodIndex,
+            onSelected = { data, index ->
+                selectedPeriodIndex = index
+                onEvent(TransactionUiEvent.OnPeriodChange(data))
+            }
+        )
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = uiState.isRecurring,
-                onCheckedChange = uiEvent.onRecurringChange
+                onCheckedChange = {
+                    onEvent(TransactionUiEvent.OnRecurringChange(it))
+                }
             )
             Text(text = "Is Recurring")
         }
         Button(
-            onClick = uiEvent.saveTransaction,
+            onClick = {
+                onEvent(TransactionUiEvent.SaveTransaction)
+            },
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isSaving,
             shape = RoundedCornerShape(8.dp)
@@ -235,7 +247,7 @@ fun AddTransactionPreview(modifier: Modifier = Modifier) {
             expenseCategoryList = emptyList(),
             incomeCategoryList = emptyList(),
             uiState = TransactionUiState(),
-            uiEvent = TransactionUiEvent({}, {}, {}, {}, {}, {}, {}, {}),
+            onEvent = {},
             onNavigateToCategoryManage = {}
         )
     }
