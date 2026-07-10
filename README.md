@@ -12,23 +12,23 @@
 - **Graphs and Charts**: Visualize expenses using pie charts for better insight.
 - **Data Persistence**: All transactions are saved using Room Database for offline usage.
 - **Filter**: Filter transactions by date range, category, or transaction type (income/expense).
+- **Export Transactions to PDF**: Easily export your entire transactions list into a PDF document for easy tracking.
 
-## 📸 Preview
+## 📱 App Screenshots
 
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/576e1fe1-54c7-4773-9a48-a480a80bda26" alt="Screenshot 3" width="300" />
-  <img src="https://github.com/user-attachments/assets/b4edd779-e07e-4b33-9fdf-41b97b21dfd7" alt="Screenshot 2" width="300" />
-  <img src="https://github.com/user-attachments/assets/5d243e3d-df96-4341-8863-ed34af3b3698" alt="Screenshot 3" width="300" />
-  <img src="https://github.com/user-attachments/assets/33d2a619-e16a-4897-9129-1b86cb2fb1ba" alt="Screenshot 1" width="300" />
-  <img src="https://github.com/user-attachments/assets/040bbda8-0c9b-49f5-bb38-91f10e0d2ddc" alt="Screenshot 1" width="300" />
-  <img src="https://github.com/user-attachments/assets/54d44f48-bf64-4606-9a3b-e36235507980" alt="Screenshot 3" width="300" />
-  <img src="https://github.com/user-attachments/assets/063fff9f-242f-4dab-b1a4-2a4f711f34ad" alt="Screenshot 3" width="300" />
-  <img src="https://github.com/user-attachments/assets/9221babc-4860-4330-a0f4-459d400739bd" alt="Screenshot 2" width="300" />
-  <img src="https://github.com/user-attachments/assets/3b5236aa-42a4-46f7-a2a7-bac306f8d934" alt="Screenshot 3" width="300" />
-  <img src="https://github.com/user-attachments/assets/baf81658-15b0-43a2-b36d-51d5d8657ed9" alt="Screenshot 3" width="300" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e2c499b6-c3d0-4d68-9604-5c0883704c56" width="23%" alt="Home Screen" />
+  <img src="https://github.com/user-attachments/assets/b12447c0-9521-4292-9c34-6af349c03a0d" width="23%" alt="Budgets Screen" />
+  <img src="https://github.com/user-attachments/assets/b1bd701d-f817-4333-ae0b-6d2f500a0fa9" width="23%" alt="Budgets Screen" />
+  <img src="https://github.com/user-attachments/assets/780c9e9d-1fd6-496f-b811-53010dcefc9e" width="23%" alt="Transactions Screen" />
+</p>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4d38e3aa-3a6f-44f5-bba1-fcfcbffdc501" width="23%" alt="Add Transactions Screen" />
+  <img src="https://github.com/user-attachments/assets/e974e5f6-17e7-44a7-a2fe-d52ee303d9ca" width="23%" alt="Analytics Screen" />
+  <img src="https://github.com/user-attachments/assets/0a51a576-b24a-4fca-ada4-64712a0421c0" width="23%" alt="Analytics Screen" />
+  <img src="https://github.com/user-attachments/assets/dc8fc6be-edba-4870-821e-9092713c2854" width="23%" alt="Settings Screen" />
+</p>
 
-
-</div>
 
 ## Requirements
 
