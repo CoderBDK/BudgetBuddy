@@ -9,7 +9,7 @@ class InitCategoryUseCase @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val initRepository: InitRepository
 ) {
-    operator fun invoke() {
+    suspend operator fun invoke() {
         initRepository.initCategory(context)
     }
 }
